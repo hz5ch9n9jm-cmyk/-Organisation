@@ -1,8 +1,14 @@
+# Organisation
+
+Persönliche Werkzeuge als einzelne Web-Seiten. Jede Datei ist die Quelle eines claude.ai-Artifacts
+(ohne eigenes `<html>`-Gerüst; das ergänzt die Veröffentlichung).
+
+| Datei | Werkzeug | Live |
+|---|---|---|
+| `index.html` | Lagezentrum: Tageslage, Aufgaben, Routinen, Woche, Ziele | https://claude.ai/artifact/5BgP95hfCsr8Ebt72iUUjd |
+| `objektakte.html` | Objektakte: Immobilien bewerten, Kauf und Vermietung prüfen | https://claude.ai/artifact/Kjhv1zj52LJtkxCb22jqKC |
+
 # Lagezentrum
-
-Persönliches Organisations-Tool als einzelne Web-Seite (`index.html`).
-
-**Live:** https://claude.ai/artifact/5BgP95hfCsr8Ebt72iUUjd
 
 ## Bereiche
 
@@ -26,3 +32,26 @@ Als claude.ai-Artifact liegen die Daten privat im eigenen Konto und werden gerä
 Ohne Anmeldung fällt die Seite auf den Browser-Speicher zurück.
 
 `index.html` ist die Artifact-Quelle (ohne eigenes `<html>`-Gerüst; das ergänzt die Veröffentlichung).
+
+# Objektakte
+
+Bewertet Immobilien für Kauf und Vermietung und gibt ein Ampel-Urteil: **Kaufen**, **Verhandeln** oder **Finger weg**.
+
+| Bereich | Inhalt |
+|---|---|
+| Urteil | Vier Prüfpunkte (Preis, Liquidität, Rendite, Risiko), Höchstpreis, Kennzahlen, Monatsrechnung, Warnungen, Stresstest |
+| Daten | Objekt, Kaufpreis und Boden, Kaufnebenkosten je Bundesland, Miete und laufende Kosten |
+| Finanzen | Eigenkapital, Hauptdarlehen, KfW/zweites Darlehen, Restschuld, Stresstest, Tilgungsplan (CSV) |
+| Prognose | Vermögen bei Verkauf über 30 Jahre mit Szenarien gegen ETF-Sparplan, Gewinnzerlegung |
+| Check | Makro- und Mikrolage, Besichtigung mit Sanierungskosten, Unterlagen (Wohnung oder Haus) |
+
+Rechenkern (`Rechner` im ersten `<script>`-Block) ohne Abhängigkeiten:
+
+- Grunderwerbsteuer je Bundesland, Stand Oktober 2026
+- Instandhaltung nach § 28 II. BV (Werte ab 1.1.2026), Mietausfallwagnis 2 % nach § 29 II. BV
+- AfA 2 % / 2,5 % (vor 1925) / 3 % (ab 2023), Inventar über 10 Jahre, 15-%-Grenze für anschaffungsnahen Aufwand
+- Annuitätendarlehen monatlich; nach der Zinsbindung tilgt die neue Rate bis zum ursprünglich geplanten Ende
+- Eigenkapitalrendite als interner Zinsfuß inkl. Verkauf; ETF-Vergleich mit identischen Einzahlungen
+- Spekulationsfrist (10 Jahre) im Verkaufserlös berücksichtigt
+
+Faustregeln, keine Steuer- oder Anlageberatung.

@@ -1,0 +1,2069 @@
+<title>Objektakte</title>
+<meta name="description" content="Immobilien bewerten: Kaufnebenkosten, Finanzierung, Steuern, Cashflow, Rendite, Stresstest, Prognose und Objekt-Check mit Ampel-Urteil.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500;600;700&family=Source+Sans+3:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: Feldbuch-App wie das Lagezentrum, max. 760px, Tab-Leiste unten; Akte je Objekt mit Urteil vor den Details. */
+:root {
+  --bg: #eceee6;
+  --surface: #f8f9f4;
+  --sunk: #e2e5da;
+  --ink: #1c2119;
+  --muted: #5a6155;
+  --line: #d0d4c6;
+  --accent: #2e3a2a;
+  --accent-fg: #f2f4ec;
+  --copper: #a85620;
+  --copper-soft: rgba(168, 86, 32, .16);
+  --violet: #4a3aa7;
+  --bar-neg: #868c7c;
+  --grid: #e1e4d9;
+  --axis: #b9beae;
+  --ok: #2b8547;   --ok-bg: #dcefe1;
+  --warn: #b98a00; --warn-bg: #f6ebc4;
+  --crit: #c0392b; --crit-bg: #f6dcd8;
+  --info: #2b67ad; --info-bg: #dbe6f3;
+  --on-status: #ffffff;
+  --shadow: 0 1px 0 rgba(28,33,25,.06), 0 6px 18px -10px rgba(28,33,25,.25);
+  --f-display: "Saira Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
+  --f-body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --r: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #131611; --surface: #1b1f18; --sunk: #232820; --ink: #e7eadf; --muted: #9ba293; --line: #31372d;
+    --accent: #cbd5b9; --accent-fg: #151812;
+    --copper: #cf7a40; --copper-soft: rgba(207, 122, 64, .2); --violet: #9085e9;
+    --bar-neg: #6b7363; --grid: #262b22; --axis: #3d4438;
+    --ok: #5cc27b; --ok-bg: rgba(92,194,123,.14);
+    --warn: #e6bd3a; --warn-bg: rgba(230,189,58,.14);
+    --crit: #ef6b5d; --crit-bg: rgba(239,107,93,.15);
+    --info: #6ba6e8; --info-bg: rgba(107,166,232,.15);
+    --on-status: #10130e;
+    --shadow: 0 1px 0 rgba(0,0,0,.3), 0 8px 20px -12px rgba(0,0,0,.7);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #131611; --surface: #1b1f18; --sunk: #232820; --ink: #e7eadf; --muted: #9ba293; --line: #31372d;
+  --accent: #cbd5b9; --accent-fg: #151812;
+  --copper: #cf7a40; --copper-soft: rgba(207, 122, 64, .2); --violet: #9085e9;
+  --bar-neg: #6b7363; --grid: #262b22; --axis: #3d4438;
+  --ok: #5cc27b; --ok-bg: rgba(92,194,123,.14);
+  --warn: #e6bd3a; --warn-bg: rgba(230,189,58,.14);
+  --crit: #ef6b5d; --crit-bg: rgba(239,107,93,.15);
+  --info: #6ba6e8; --info-bg: rgba(107,166,232,.15);
+  --on-status: #10130e;
+  --shadow: 0 1px 0 rgba(0,0,0,.3), 0 8px 20px -12px rgba(0,0,0,.7);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--f-body); font-size: 16px; line-height: 1.45;
+  padding-inline: 16px; padding-block: 0 calc(92px + env(safe-area-inset-bottom, 0px));
+  -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: 760px; margin: 0 auto; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--info); outline-offset: 2px; }
+h1, h2, h3 { font-family: var(--f-display); font-weight: 700; letter-spacing: .01em; text-wrap: balance; margin: 0; line-height: 1.1; hyphens: auto; }
+h2 { font-size: 1.55rem; }
+h3 { font-size: 1.15rem; font-weight: 600; }
+p { margin: 0; }
+.mono, .num { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+.eyebrow { font-family: var(--f-display); font-weight: 600; font-size: .78rem; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.muted { color: var(--muted); }
+.small { font-size: .88rem; }
+.tiny { font-size: .78rem; }
+a { color: var(--info); }
+
+/* Kopf */
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); padding-block: 12px 8px; border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 8px; }
+.top-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-width: 0; }
+.brand { display: flex; flex-direction: column; min-width: 0; }
+.brand h1 { font-size: 1.6rem; text-transform: uppercase; letter-spacing: .06em; }
+.dtg { font-family: var(--f-mono); font-size: .78rem; color: var(--muted); letter-spacing: .04em; }
+.sync { font-size: .75rem; display: inline-flex; align-items: center; gap: 6px; color: var(--muted); }
+.sync i { width: 8px; height: 8px; border-radius: 50%; background: var(--warn); display: inline-block; }
+.sync.on i { background: var(--ok); }
+@media (max-width: 480px) { .sync span { display: none; } }
+.back { display: inline-flex; align-items: center; gap: 4px; background: none; border: none; padding: 6px 4px 6px 0; font-weight: 600; color: var(--info); flex-shrink: 0; }
+.obj-title { min-width: 0; flex: 1; display: flex; flex-direction: column; }
+.obj-title b { font-family: var(--f-display); font-size: 1.2rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.obj-title span { font-family: var(--f-mono); font-size: .72rem; color: var(--muted); }
+.subnav { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; }
+.subnav::-webkit-scrollbar { display: none; }
+.subnav button { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 6px 4px; font-family: var(--f-display); font-weight: 600; letter-spacing: .03em; text-transform: uppercase; font-size: .78rem; color: var(--muted); }
+@media (min-width: 560px) { .subnav button { font-size: .84rem; letter-spacing: .05em; } }
+.subnav button[aria-current="page"] { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+.livestrip { display: flex; gap: 6px 14px; flex-wrap: wrap; font-size: .8rem; color: var(--muted); }
+.livestrip b { font-family: var(--f-mono); font-variant-numeric: tabular-nums; color: var(--ink); font-weight: 700; }
+
+main { display: flex; flex-direction: column; gap: 18px; padding-block: 18px; }
+section.view { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+section.view > * { min-width: 0; }
+
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.card-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px 10px; flex-wrap: wrap; }
+.stack { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+
+/* Chips & Ampel */
+.chip { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 999px; font-size: .8rem; font-weight: 600; border: 1px solid var(--line); background: var(--surface); color: var(--ink); white-space: nowrap; }
+.chip.g { background: var(--ok-bg); color: var(--ok); border-color: transparent; }
+.chip.y { background: var(--warn-bg); color: var(--warn); border-color: transparent; }
+.chip.r { background: var(--crit-bg); color: var(--crit); border-color: transparent; }
+.chip.b { background: var(--info-bg); color: var(--info); border-color: transparent; }
+.chip.wrap { white-space: normal; }
+.sym { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; font-size: .72rem; font-weight: 800; line-height: 1; flex-shrink: 0; color: var(--on-status); background: var(--muted); font-family: var(--f-body); }
+.sym.g { background: var(--ok); } .sym.y { background: var(--warn); } .sym.r { background: var(--crit); } .sym.b { background: var(--info); }
+
+/* Buttons */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-radius: 8px; padding: 9px 14px; font-weight: 600; border: 1px solid var(--line); background: var(--surface); color: var(--ink); min-height: 40px; text-decoration: none; }
+.btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+.btn.danger { color: var(--crit); border-color: var(--crit); background: transparent; }
+.btn.danger.armed { background: var(--crit); color: var(--on-status); }
+.btn.sm { padding: 5px 10px; min-height: 32px; font-size: .88rem; }
+.btn.link { border: none; background: none; padding: 4px 0; min-height: 0; color: var(--info); font-weight: 600; }
+.ibtn { width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); color: var(--muted); font-size: .72rem; font-weight: 700; font-family: var(--f-mono); padding: 0; display: inline-grid; place-items: center; flex-shrink: 0; vertical-align: middle; }
+.ibtn:hover { color: var(--info); border-color: var(--info); }
+
+/* Urteil */
+.verdict { border-radius: var(--r); padding: 18px; display: flex; flex-direction: column; gap: 12px; box-shadow: var(--shadow); border: 1px solid transparent; }
+.verdict.g { background: var(--ok-bg); }
+.verdict.y { background: var(--warn-bg); }
+.verdict.r { background: var(--crit-bg); }
+.verdict.n { background: var(--sunk); }
+.v-word { overflow-wrap: anywhere; font-family: var(--f-display); font-weight: 700; font-size: clamp(1.9rem, 10vw, 3.2rem); line-height: .95; letter-spacing: .04em; text-transform: uppercase; }
+.verdict.g .v-word { color: var(--ok); } .verdict.y .v-word { color: var(--warn); } .verdict.r .v-word { color: var(--crit); }
+.v-lead { font-size: 1.02rem; font-weight: 600; max-width: 60ch; }
+.pillars { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.pillars li { display: grid; grid-template-columns: 18px 78px 1fr; gap: 10px; align-items: start; font-size: .94rem; }
+.pillars li b { font-weight: 700; }
+.pillars li span.t { min-width: 0; overflow-wrap: anywhere; }
+
+/* Kennzahlen */
+.tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+@media (min-width: 640px) { .tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.tile { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.tile .lbl { display: flex; align-items: center; justify-content: space-between; gap: 6px; font-size: .8rem; color: var(--muted); font-weight: 600; }
+.tile .lbl span { min-width: 0; overflow-wrap: break-word; hyphens: auto; }
+.tile .val { font-family: var(--f-mono); font-size: 1.3rem; font-weight: 700; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.tile .val.g { color: var(--ok); } .tile .val.y { color: var(--warn); } .tile .val.r { color: var(--crit); }
+.tile .thr { font-size: .74rem; color: var(--muted); }
+
+.maxrow { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; align-items: baseline; padding-block: 8px; border-top: 1px solid var(--line); }
+.maxrow:first-of-type { border-top: none; }
+.maxrow .v { font-family: var(--f-mono); font-weight: 700; font-size: 1.15rem; font-variant-numeric: tabular-nums; text-align: right; }
+.maxrow .sub { grid-column: 1 / -1; font-size: .82rem; color: var(--muted); }
+
+.notes { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.notes li { display: grid; grid-template-columns: 18px 1fr; gap: 10px; align-items: start; font-size: .92rem; }
+.notes li span.t { min-width: 0; overflow-wrap: anywhere; }
+
+/* Wasserfall */
+.wf { display: flex; flex-direction: column; gap: 6px; }
+.wf-row { display: grid; grid-template-columns: minmax(0, 9.5rem) 1fr 5.6rem; gap: 10px; align-items: center; font-size: .86rem; }
+@media (min-width: 560px) { .wf-row { grid-template-columns: 13rem 1fr 6.4rem; } }
+.wf-l { min-width: 0; overflow-wrap: anywhere; line-height: 1.2; }
+.wf-row.sub .wf-l, .wf-row.end .wf-l { font-weight: 700; }
+.wf-track { position: relative; height: 18px; }
+.wf-zero { position: absolute; top: -3px; bottom: -3px; width: 1px; background: var(--axis); }
+.wf-bar { position: absolute; top: 2px; bottom: 2px; border-radius: 4px; background: var(--bar-neg); min-width: 2px; }
+.wf-bar.pos { background: var(--copper); }
+.wf-bar.sub { background: var(--ink); }
+.wf-bar.g { background: var(--ok); } .wf-bar.y { background: var(--warn); } .wf-bar.r { background: var(--crit); }
+.wf-v { text-align: right; font-family: var(--f-mono); font-variant-numeric: tabular-nums; font-weight: 600; white-space: nowrap; }
+.wf-row.end { padding-top: 6px; border-top: 1px solid var(--line); }
+.wf-ref { position: absolute; top: -4px; bottom: -4px; width: 0; border-left: 2px dashed var(--violet); }
+
+/* Bullet (Vergleichsskala) */
+.bullet { display: flex; flex-direction: column; gap: 6px; }
+.bullet-track { position: relative; height: 14px; border-radius: 4px; overflow: hidden; display: flex; }
+.bullet-track i { display: block; height: 100%; }
+.bz-b { background: var(--info-bg); } .bz-g { background: var(--ok-bg); } .bz-y { background: var(--warn-bg); } .bz-r { background: var(--crit-bg); }
+.bullet-wrap { position: relative; padding-top: 2px; }
+.bullet-mark { position: absolute; top: -3px; width: 4px; height: 20px; margin-left: -2px; border-radius: 2px; background: var(--ink); box-shadow: 0 0 0 2px var(--surface); }
+.bullet-ref { position: absolute; top: 0; height: 16px; width: 0; border-left: 2px dashed var(--muted); }
+.bullet-legend { display: flex; justify-content: space-between; gap: 8px; font-size: .76rem; color: var(--muted); flex-wrap: wrap; }
+
+/* Formulare */
+.fgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.fgrid .full { grid-column: 1 / -1; }
+@media (max-width: 360px) { .fgrid { grid-template-columns: 1fr; } }
+.fld { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.fld .lbl { display: flex; align-items: center; gap: 6px; font-size: .84rem; font-weight: 600; color: var(--muted); min-height: 22px; }
+.fld .lbl label { min-width: 0; overflow-wrap: break-word; hyphens: auto; }
+.inp { display: flex; align-items: stretch; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; min-height: 42px; overflow: hidden; }
+.inp:focus-within { border-color: var(--info); box-shadow: 0 0 0 2px var(--info-bg); }
+.inp input { flex: 1; min-width: 0; border: none; background: transparent; padding: 8px 10px; font-family: var(--f-mono); font-variant-numeric: tabular-nums; font-size: .98rem; outline: none; }
+.inp input.txt { font-family: var(--f-body); }
+.inp .u { display: flex; align-items: center; padding: 0 10px; background: var(--sunk); color: var(--muted); font-size: .8rem; font-weight: 600; white-space: nowrap; }
+.fld .hint { font-size: .76rem; color: var(--muted); min-height: 1em; }
+select, textarea { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 9px 11px; width: 100%; min-height: 42px; }
+textarea { min-height: 96px; resize: vertical; font-family: var(--f-body); }
+.seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.seg button { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 7px 12px; font-weight: 600; font-size: .9rem; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+.switch { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: .92rem; cursor: pointer; }
+.switch input { width: 20px; height: 20px; accent-color: var(--accent); }
+.sumtable { width: 100%; border-collapse: collapse; font-size: .92rem; }
+.sumtable td { padding: 6px 0; border-top: 1px solid var(--line); }
+.sumtable tr:first-child td { border-top: none; }
+.sumtable td.n { text-align: right; font-family: var(--f-mono); font-variant-numeric: tabular-nums; white-space: nowrap; padding-left: 10px; }
+.sumtable tr.total td { font-weight: 700; border-top: 2px solid var(--ink); font-size: 1rem; }
+.sumtable td .muted { font-size: .8rem; }
+
+/* Tabellen */
+.tscroll { overflow-x: auto; -webkit-overflow-scrolling: touch; max-width: 100%; border: 1px solid var(--line); border-radius: 8px; }
+.tscroll.tall { max-height: 380px; overflow-y: auto; }
+table.data { border-collapse: collapse; width: 100%; font-size: .86rem; }
+table.data th, table.data td { padding: 7px 10px; text-align: right; white-space: nowrap; border-bottom: 1px solid var(--line); }
+table.data th:first-child, table.data td:first-child { text-align: left; position: sticky; left: 0; background: var(--surface); z-index: 1; }
+table.data thead th { position: sticky; top: 0; background: var(--sunk); font-family: var(--f-display); letter-spacing: .05em; text-transform: uppercase; font-size: .76rem; color: var(--muted); z-index: 2; }
+table.data thead th:first-child { z-index: 3; background: var(--sunk); }
+table.data td { font-family: var(--f-mono); font-variant-numeric: tabular-nums; background: var(--surface); }
+table.data td:first-child { font-family: var(--f-body); font-weight: 600; }
+table.data tr.mark td { background: var(--warn-bg); }
+table.data tr.mark td:first-child { background: var(--warn-bg); }
+table.data td.best { color: var(--ok); font-weight: 700; }
+
+/* Diagramm */
+.chart { position: relative; width: 100%; min-height: 240px; }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+.chart text { font-family: var(--f-mono); font-size: 11px; fill: var(--muted); }
+.chart text.lab { font-family: var(--f-body); font-size: 12px; font-weight: 600; fill: var(--ink); }
+.chart .gridl { stroke: var(--grid); stroke-width: 1; }
+.chart .base { stroke: var(--axis); stroke-width: 1; }
+.chart .guide { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 2 3; }
+.chart .band { fill: var(--copper-soft); stroke: none; }
+.chart .l-immo { fill: none; stroke: var(--copper); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.chart .l-etf { fill: none; stroke: var(--violet); stroke-width: 2; stroke-dasharray: 6 4; stroke-linejoin: round; }
+.chart .m-immo { fill: var(--copper); stroke: var(--surface); stroke-width: 2; }
+.chart .m-etf { fill: var(--violet); stroke: var(--surface); stroke-width: 2; }
+.chart .cross { stroke: var(--ink); stroke-width: 1; opacity: .5; }
+.tip { position: absolute; pointer-events: none; background: var(--ink); color: var(--bg); border-radius: 8px; padding: 8px 10px; font-size: .8rem; line-height: 1.35; min-width: 150px; box-shadow: var(--shadow); z-index: 4; }
+.tip b { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+.tip .tr { display: flex; justify-content: space-between; gap: 12px; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: .84rem; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.lg-immo { width: 18px; height: 3px; background: var(--copper); border-radius: 2px; }
+.lg-band { width: 18px; height: 12px; background: var(--copper-soft); border-radius: 3px; }
+.lg-etf { width: 18px; height: 0; border-top: 3px dashed var(--violet); }
+
+/* Liste */
+.objcard { display: flex; flex-direction: column; gap: 10px; text-align: left; width: 100%; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px; box-shadow: var(--shadow); color: inherit; }
+.objcard:hover { border-color: var(--muted); }
+.objcard.dim { opacity: .7; }
+.oc-top { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; }
+.oc-top .t { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.oc-top .t b { font-family: var(--f-display); font-size: 1.25rem; line-height: 1.1; overflow-wrap: anywhere; }
+.oc-top .t span { font-size: .85rem; color: var(--muted); overflow-wrap: anywhere; }
+.oc-nums { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.oc-nums .n { display: flex; flex-direction: column; min-width: 0; }
+.oc-nums span { font-size: .72rem; color: var(--muted); }
+.oc-nums b { font-family: var(--f-mono); font-variant-numeric: tabular-nums; font-size: .98rem; overflow-wrap: anywhere; }
+.ak { font-family: var(--f-mono); font-size: .72rem; color: var(--muted); letter-spacing: .03em; }
+
+/* Check */
+.citem { display: grid; grid-template-columns: 1fr; gap: 6px; padding-block: 10px; border-top: 1px solid var(--line); }
+.citem:first-child { border-top: none; }
+.citem .ct { font-weight: 600; overflow-wrap: anywhere; }
+.citem .cd { font-size: .82rem; color: var(--muted); }
+.cstate { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.cstate button { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 4px 12px; font-size: .82rem; font-weight: 600; }
+.cstate button[aria-pressed="true"].ok { background: var(--ok); border-color: var(--ok); color: var(--on-status); }
+.cstate button[aria-pressed="true"].mangel { background: var(--warn); border-color: var(--warn); color: var(--on-status); }
+.cstate button[aria-pressed="true"].krit { background: var(--crit); border-color: var(--crit); color: var(--on-status); }
+.cstate .inp { min-height: 34px; max-width: 170px; }
+.cstate .inp input { padding: 4px 8px; font-size: .9rem; }
+.progress { height: 6px; border-radius: 999px; background: var(--sunk); overflow: hidden; display: flex; }
+.progress i { display: block; height: 100%; }
+.progress .p-ok { background: var(--ok); } .progress .p-m { background: var(--warn); } .progress .p-k { background: var(--crit); }
+
+.note { border-radius: 8px; padding: 10px 12px; font-size: .9rem; display: flex; gap: 10px; align-items: flex-start; }
+.note.b { background: var(--info-bg); }
+.note.y { background: var(--warn-bg); }
+.note.g { background: var(--ok-bg); }
+.note > span { min-width: 0; }
+.empty { padding: 18px; border: 1.5px dashed var(--line); border-radius: var(--r); display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
+
+/* Wissen */
+.gloss { display: flex; flex-direction: column; }
+.gloss details { border-top: 1px solid var(--line); padding-block: 10px; }
+.gloss details:first-child { border-top: none; }
+.gloss summary { cursor: pointer; font-weight: 700; list-style: none; display: flex; justify-content: space-between; gap: 10px; }
+.gloss summary::-webkit-details-marker { display: none; }
+.gloss summary::after { content: "+"; font-family: var(--f-mono); color: var(--muted); }
+.gloss details[open] summary::after { content: "−"; }
+.gloss p { margin-top: 6px; font-size: .93rem; max-width: 68ch; }
+ol.steps { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 8px; }
+ol.steps li { padding-left: 4px; }
+ol.steps li::marker { font-family: var(--f-mono); font-weight: 700; color: var(--muted); }
+table.rules { border-collapse: collapse; width: 100%; font-size: .86rem; }
+table.rules th, table.rules td { padding: 7px 8px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; }
+table.rules th { font-family: var(--f-display); text-transform: uppercase; letter-spacing: .05em; font-size: .76rem; color: var(--muted); }
+
+/* Tab-Leiste */
+nav.tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 10; background: var(--surface); border-top: 1px solid var(--line); padding: 6px 8px calc(6px + env(safe-area-inset-bottom, 0px)); }
+nav.tabs .in { max-width: 760px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+nav.tabs button { background: none; border: none; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 2px; border-radius: 8px; color: var(--muted); font-family: var(--f-display); font-weight: 600; font-size: .8rem; letter-spacing: .06em; text-transform: uppercase; }
+nav.tabs button svg { width: 22px; height: 22px; }
+nav.tabs button[aria-current="page"] { color: var(--ink); background: var(--sunk); }
+
+/* Bogen */
+.scrim { position: fixed; inset: 0; background: rgba(10,12,9,.45); z-index: 20; display: flex; align-items: flex-end; justify-content: center; }
+.sheet { background: var(--bg); width: 100%; max-width: 560px; max-height: 88vh; overflow-y: auto; border-radius: 16px 16px 0 0; padding: 18px 16px calc(18px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; gap: 12px; }
+.sheet p { max-width: 62ch; }
+@media (min-width: 640px) { .scrim { align-items: center; } .sheet { border-radius: 16px; } }
+.toast { position: fixed; left: 50%; bottom: calc(86px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 9px 16px; border-radius: 999px; font-weight: 600; font-size: .9rem; z-index: 40; max-width: calc(100% - 32px); text-align: center; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+
+<div class="wrap" lang="de">
+  <header class="top" id="top"></header>
+  <main id="main"></main>
+</div>
+<nav class="tabs" aria-label="Bereiche" lang="de"><div class="in" id="tabs"></div></nav>
+<div id="layer" lang="de"></div>
+
+<script>
+/* ================= Rechenkern ================= */
+const Rechner = (function () {
+  "use strict";
+  /* Grunderwerbsteuer in %, Stand Oktober 2026 (Bremen 5,5 % seit 1.7.2025) */
+  const GREST = { BW: 5, BY: 3.5, BE: 6, BB: 6.5, HB: 5.5, HH: 5.5, HE: 6, MV: 6, NI: 5, NW: 6.5, RP: 5, SL: 6.5, SN: 5.5, ST: 5, SH: 6.5, TH: 5 };
+  const LAENDER = { BW: "Baden-Württemberg", BY: "Bayern", BE: "Berlin", BB: "Brandenburg", HB: "Bremen", HH: "Hamburg", HE: "Hessen", MV: "Mecklenburg-Vorpommern", NI: "Niedersachsen", NW: "Nordrhein-Westfalen", RP: "Rheinland-Pfalz", SL: "Saarland", SN: "Sachsen", ST: "Sachsen-Anhalt", SH: "Schleswig-Holstein", TH: "Thüringen" };
+  /* § 28 II. BV, Instandhaltung je m² und Jahr ab 1.1.2026: unter 22 J. / ab 22 J. / ab 32 J. */
+  const II_BV = [11.50, 14.58, 18.62];
+  const SZEN = {
+    pess: { dWert: -1.5, dMiete: -1, dZins: 2, dAusfall: 2, dKosten: 0.5 },
+    real: {},
+    opt: { dWert: 1, dMiete: 0.5, dZins: -0.5, dAusfall: -1 }
+  };
+  const JAHR = new Date().getFullYear();
+  const Y = 50;
+  const has = v => typeof v === "number" && isFinite(v);
+  const n = v => has(v) ? v : 0;
+
+  function instandRichtwert(o) {
+    const alter = JAHR - (n(o.baujahr) > 1700 ? o.baujahr : JAHR);
+    const base = alter >= 32 ? II_BV[2] : alter >= 22 ? II_BV[1] : II_BV[0];
+    return o.art === "etw" ? Math.round(base * 50) / 100 : base;
+  }
+
+  function fehlend(o) {
+    const f = [];
+    if (!(n(o.preis) > 0)) f.push("Kaufpreis");
+    if (!(n(o.miete) > 0)) f.push("Kaltmiete");
+    if (!(n(o.flaeche) > 0)) f.push("Wohnfläche");
+    if (!(n(o.baujahr) > 1700)) f.push("Baujahr");
+    return f;
+  }
+
+  function sanierung(o) {
+    let s = 0;
+    const costs = o.costs || {}, checks = o.checks || {};
+    for (const k in costs) {
+      const st = checks[k];
+      if (k === "sonst" || st === "mangel" || st === "krit") s += n(costs[k]);
+    }
+    return s;
+  }
+
+  /* Annuitätendarlehen, monatlich gerechnet. Nach der Zinsbindung wird die Rate so neu berechnet,
+     dass der Kredit zum ursprünglich geplanten Zeitpunkt getilgt ist. */
+  function simLoan(L, z, t, bind, az, sonderPct) {
+    const out = { zins: [], tilg: [], sonder: [], rate: [], rest: [], restBind: null, payoff: null, rate0: 0, rateNach: null };
+    if (!(L > 0)) {
+      for (let y = 0; y < Y; y++) { out.zins.push(0); out.tilg.push(0); out.sonder.push(0); out.rate.push(0); out.rest.push(0); }
+      out.restBind = 0; out.payoff = 0;
+      return out;
+    }
+    let rest = L, q = z / 1200;
+    let pay = L * (z + t) / 1200;
+    let nTotal;
+    if (t <= 0) nTotal = Infinity;
+    else if (q === 0) nTotal = L / pay;
+    else nTotal = -Math.log(1 - q * L / pay) / Math.log(1 + q);
+    out.rate0 = pay;
+    const bindM = Math.round(bind) * 12;
+    for (let y = 1; y <= Y; y++) {
+      let zs = 0, ts = 0, ss = 0, rs = 0;
+      for (let m = 1; m <= 12; m++) {
+        const mi = (y - 1) * 12 + m;
+        if (bindM > 0 && mi === bindM + 1 && rest > 0.005) {
+          q = az / 1200;
+          const remaining = nTotal - bindM;
+          if (!isFinite(remaining)) pay = rest * q;
+          else if (remaining <= 1) pay = rest * (1 + q);
+          else pay = q === 0 ? rest / remaining : rest * q / (1 - Math.pow(1 + q, -remaining));
+          out.rateNach = pay;
+        }
+        if (rest <= 0.005) continue;
+        const zi = rest * q;
+        const tg = Math.max(0, Math.min(rest, pay - zi));
+        rest -= tg; zs += zi; ts += tg; rs += zi + tg;
+      }
+      if (sonderPct > 0 && rest > 0.005) { const s = Math.min(rest, L * sonderPct / 100); rest -= s; ss += s; }
+      if (rest < 0.005) rest = 0;
+      if (y === Math.round(bind)) out.restBind = rest;
+      if (rest === 0 && out.payoff === null) out.payoff = y;
+      out.zins.push(zs); out.tilg.push(ts); out.sonder.push(ss); out.rate.push(rs); out.rest.push(rest);
+    }
+    return out;
+  }
+
+  function irr(flows) {
+    if (!flows.some(f => Math.abs(f) > 0.005)) return null;
+    const npv = r => { let s = 0; for (let t = 0; t < flows.length; t++) s += flows[t] / Math.pow(1 + r, t); return s; };
+    let prevR = -0.9, prevV = npv(prevR);
+    for (let r = -0.89; r <= 1.0001; r += 0.01) {
+      const v = npv(r);
+      if (isFinite(v) && isFinite(prevV) && (v === 0 || (v > 0) !== (prevV > 0))) {
+        let a = prevR, b = r, va = prevV;
+        for (let i = 0; i < 60; i++) {
+          const mid = (a + b) / 2, vm = npv(mid);
+          if ((vm > 0) === (va > 0)) { a = mid; va = vm; } else b = mid;
+        }
+        return (a + b) / 2;
+      }
+      prevR = r; prevV = v;
+    }
+    return null;
+  }
+
+  function calc(o, A, ov) {
+    ov = ov || {};
+    const preis = has(ov.preis) ? ov.preis : n(o.preis);
+    const sp = n(o.stellplatz), inv = n(o.inventar);
+    const immo = preis + sp, kauf = immo + inv;
+    const grestSatz = has(o.grest) ? o.grest : (GREST[o.land] ?? 5);
+    const grest = immo * grestSatz / 100;
+    const notar = kauf * n(o.notar) / 100, grundbuch = kauf * n(o.grundbuch) / 100, makler = kauf * n(o.makler) / 100;
+    const gutachter = n(o.gutachter);
+    const nk = grest + notar + grundbuch + makler + gutachter;
+    const sanStau = sanierung(o);
+    const san = o.sanEin === false ? 0 : sanStau;
+    const gesamt = kauf + nk + san;
+
+    /* Boden, AfA */
+    const bodenWert = (n(o.bodenrichtwert) > 0 && n(o.grundstueck) > 0) ? o.bodenrichtwert * o.grundstueck : immo * n(o.bodenProz) / 100;
+    const bodenAnteil = immo > 0 ? Math.min(0.95, Math.max(0, bodenWert / immo)) : 0;
+    const gebPreis = immo * (1 - bodenAnteil);
+    const nkRest = notar + grundbuch + makler + gutachter;
+    const nkGeb = grest * (1 - bodenAnteil) + (kauf > 0 ? nkRest * gebPreis / kauf : 0);
+    const nkInv = kauf > 0 ? nkRest * inv / kauf : 0;
+    let afaBasis = gebPreis + nkGeb;
+    const anschaffungsnah = san > 0 && san / 1.19 > 0.15 * afaBasis;
+    if (anschaffungsnah) afaBasis += san;
+    const sofort = san > 0 && !anschaffungsnah ? san : 0;
+    const bj = n(o.baujahr) > 1700 ? o.baujahr : JAHR;
+    const afaSatz = bj < 1925 ? 2.5 : bj >= 2023 ? 3 : 2;
+    const afaGeb = afaBasis * afaSatz / 100;
+    const afaInv = (inv + nkInv) / 10;
+    const akVerkauf = immo + nk - nkInv + (anschaffungsnah ? san : 0);
+
+    /* Miete und laufende Kosten */
+    const flaeche = n(o.flaeche);
+    const jm0 = n(o.miete) * 12;
+    const ausfallSatz = Math.max(0, n(o.ausfall) + (ov.dAusfall || 0)) / 100;
+    const instand = has(o.instand) ? o.instand : instandRichtwert(o);
+    const kostenHG = n(o.hausgeld) * 12, kostenVw = n(o.verwaltung) * 12, kostenIh = instand * flaeche;
+    const kosten0 = kostenHG + kostenVw + kostenIh;
+    const mietst = (n(o.mietst) + (ov.dMiete || 0)) / 100;
+    const wertst = (n(o.wertst) + (ov.dWert || 0)) / 100;
+    const kostst = (n(A.kostenst) + (ov.dKosten || 0)) / 100;
+
+    /* Finanzierung */
+    const ekEff = Math.min(Math.max(0, n(o.ek)), gesamt);
+    const bedarf = Math.max(0, gesamt - ekEff);
+    const kfw = o.kfwOn ? Math.min(Math.max(0, n(o.kfwBetrag)), bedarf) : 0;
+    const L1 = bedarf - kfw;
+    const zins = n(o.zins);
+    const delta = (has(o.anschluss) ? o.anschluss - zins : 0) + (ov.dZins || 0);
+    const d1 = simLoan(L1, zins, n(o.tilg), n(o.bindung), Math.max(0, zins + delta), n(o.sonder));
+    const d2 = simLoan(kfw, n(o.kfwZins), n(o.kfwTilg), n(o.kfwBindung), Math.max(0, n(o.kfwZins) + delta), 0);
+
+    const steuer = n(A.steuer) / 100;
+    const r = n(A.etf) / 100, etfSt = n(A.etfSteuer) / 100, vkSatz = n(A.vk) / 100;
+    const jahre = [{ y: 0, wert: immo, rest: bedarf, vermoegen: immo * (1 - vkSatz) - bedarf, etf: ekEff, eingesetzt: ekEff, zuz: 0, tilgKum: 0, ws: 0, side: 0, vk: immo * vkSatz, speku: 0 }];
+    let cumAfa = 0, side = 0, sideIn = 0, depot = ekEff, depotIn = ekEff, zuz = 0;
+    for (let y = 1; y <= Y; y++) {
+      const i = y - 1;
+      const jm = jm0 * Math.pow(1 + mietst, i);
+      const ausfall = jm * ausfallSatz;
+      const kf = Math.pow(1 + kostst, i);
+      const kosten = kosten0 * kf;
+      const noi = jm - ausfall - kosten;
+      const zinsen = d1.zins[i] + d2.zins[i];
+      const tilg = d1.tilg[i] + d2.tilg[i];
+      const sonder = d1.sonder[i] + d2.sonder[i];
+      const rate = d1.rate[i] + d2.rate[i];
+      const rest = d1.rest[i] + d2.rest[i];
+      const cfv = noi - rate;
+      const afaG = Math.min(afaGeb, Math.max(0, afaBasis - cumAfa));
+      cumAfa += afaG;
+      const afa = afaG + (y <= 10 ? afaInv : 0);
+      const ergLfd = jm - ausfall - kosten - zinsen - afa;
+      const erg = ergLfd - (y === 1 ? sofort : 0);
+      const st = erg * steuer;
+      const stLfd = ergLfd * steuer;
+      const cfn = cfv - st;
+      const cfnLfd = cfv - stLfd;
+      const cash = cfn - sonder;
+      const wert = immo * Math.pow(1 + wertst, y);
+      const vk = wert * vkSatz;
+      const gewinn = wert - vk - (akVerkauf - cumAfa);
+      const speku = y < 10 && gewinn > 0 ? gewinn * steuer : 0;
+      const netto = wert - vk - rest - speku;
+      side = side * (1 + r) + Math.max(0, cash); sideIn += Math.max(0, cash);
+      depot = depot * (1 + r) + Math.max(0, -cash); depotIn += Math.max(0, -cash);
+      zuz += Math.max(0, -cash);
+      const sideNet = side - Math.max(0, side - sideIn) * etfSt;
+      const etfNet = depot - Math.max(0, depot - depotIn) * etfSt;
+      jahre.push({
+        y, jm, ausfall, kosten, kostenHG: kostenHG * kf, kostenVw: kostenVw * kf, kostenIh: kostenIh * kf, noi,
+        zinsen, tilg, sonder, rate, rest, cfv, afa, erg, st, stLfd, cfn, cfnLfd, cash,
+        wert, vk, speku, netto, side: sideNet, vermoegen: netto + sideNet, etf: etfNet,
+        eingesetzt: ekEff + zuz, zuz, tilgKum: bedarf - rest, ws: wert - immo
+      });
+    }
+
+    const H = Math.max(1, Math.min(Y, Math.round(n(A.halte)) || 15));
+    const fl = [-ekEff], fe = [-ekEff];
+    for (let y = 1; y <= H; y++) {
+      const j = jahre[y];
+      fl.push(j.cash + (y === H ? j.netto : 0));
+      fe.push(-Math.max(0, -j.cash) + (y === H ? j.etf : 0));
+    }
+    const j1 = jahre[1];
+    let zinsGesamt = 0;
+    for (let y = 1; y <= Y; y++) zinsGesamt += jahre[y].zinsen;
+    const payoff = (d1.payoff === null || d2.payoff === null) ? null : Math.max(d1.payoff, d2.payoff);
+
+    return {
+      preis, sp, inv, immo, kauf, grestSatz, grest, notar, grundbuch, makler, gutachter, nk, sanStau, san, gesamt,
+      bodenWert, bodenAnteil, gebPreis, afaBasis, afaSatz, afaGeb, afaInv, anschaffungsnah, sofort, sofortEffekt: sofort * steuer,
+      instand, instandRichtwert: instandRichtwert(o), kosten0, jm0, ausfallSatz,
+      ekEff, ekUeber: Math.max(0, n(o.ek) - gesamt), bedarf, kfw, L1, d1, d2, delta, az: zins + delta,
+      jahre, H, irrImmo: irr(fl), irrEtf: irr(fe), flowSum: fl.reduce((a, b) => a + b, 0),
+      faktor: jm0 > 0 ? immo / jm0 : null,
+      brutto: immo > 0 ? jm0 / immo * 100 : null,
+      netto: gesamt > 0 ? j1.noi / gesamt * 100 : null,
+      dscr: j1.rate > 0 ? j1.noi / j1.rate : null,
+      cfvMon: j1.cfv / 12, cfnMon: j1.cfnLfd / 12, rateMon: j1.rate / 12,
+      effZins: bedarf > 0 ? (L1 * zins + kfw * n(o.kfwZins)) / bedarf : zins,
+      zinsGesamt, payoff
+    };
+  }
+
+  function stressRow(o, A, c, d) {
+    const bind = Math.round(n(o.bindung));
+    const L = c.L1 + c.kfw;
+    if (!(L > 0)) return { d, none: "Kein Darlehen" };
+    if (bind < 1 || bind >= Y) return { d, none: "Keine Anschlussfinanzierung im Rechenzeitraum" };
+    const vor = c.jahre[bind], nach = c.jahre[bind + 1];
+    if (!(vor.rest > 0)) return { d, none: "Darlehen ist vorher getilgt" };
+    return { d, az: c.az, rateVor: vor.rate / 12, rateNach: nach.rate / 12, cfnNach: nach.cfnLfd / 12, jahr: bind + 1 };
+  }
+
+  const BESICHT_IDS = ["dach", "decke", "eindeckung", "feucht", "schimmel", "fenster", "heizung", "elektrik", "leitungen", "bad", "fassade", "schadstoff", "balkon"];
+
+  function bewerten(o, A, c) {
+    const fehlt = fehlend(o);
+    if (fehlt.length) return { fehlt, verdict: null };
+    const puffer = n(A.puffer);
+    const stress = [0, 2, 4].map(d => stressRow(o, A, d === 0 ? c : calc(o, A, { dZins: d }), d));
+    const checks = o.checks || {};
+    const krit = Object.values(checks).filter(v => v === "krit").length;
+    const maengel = BESICHT_IDS.filter(k => checks[k] === "mangel").length;
+    const flags = [];
+    if (krit) flags.push({ s: "r", t: krit === 1 ? "1 kritischer Punkt im Objekt-Check" : krit + " kritische Punkte im Objekt-Check" });
+    if (n(o.vergleichQm) > 0 && n(o.flaeche) > 0) {
+      const ratio = (o.miete / o.flaeche) / o.vergleichQm;
+      if (ratio > 1.2) flags.push({ s: "r", t: "Miete " + Math.round((ratio - 1) * 100) + " % über der Vergleichsmiete: Mietpreisbremse und Leerstandsrisiko prüfen" });
+      else if (ratio > 1.1) flags.push({ s: "y", t: "Miete " + Math.round((ratio - 1) * 100) + " % über der Vergleichsmiete" });
+    }
+    if (c.bedarf > 0) {
+      const b = Math.round(n(o.bindung));
+      if (b < 5) flags.push({ s: "r", t: "Zinsbindung unter 5 Jahren: hohes Zinsrisiko" });
+      else if (b < 10) flags.push({ s: "y", t: "Zinsbindung unter 10 Jahren" });
+    }
+    const s2 = stress[1];
+    if (s2 && !s2.none) {
+      if (s2.cfnNach < -2 * puffer) flags.push({ s: "r", t: "Bei +2 % Anschlusszins zahlst du " + Math.round(-s2.cfnNach) + " € im Monat zu" });
+      else if (s2.cfnNach < -puffer) flags.push({ s: "y", t: "Bei +2 % Anschlusszins zahlst du " + Math.round(-s2.cfnNach) + " € im Monat zu (über deinem Puffer)" });
+    }
+    if (["F", "G", "H"].includes(o.energie)) flags.push({ s: "y", t: "Energieklasse " + o.energie + ": Modernisierung und CO₂-Kostenanteil einplanen" });
+    if (n(o.flaeche) > 0 && c.sanStau / o.flaeche > 200) flags.push({ s: "y", t: "Sanierungsstau über 200 € je m²" });
+    if (maengel >= 3) flags.push({ s: "y", t: maengel + " Mängel bei der Besichtigung" });
+
+    const P = {};
+    P.preis = c.faktor <= 20 ? "g" : c.faktor <= 25 ? "y" : "r";
+    P.liq = c.cfnMon >= 0 ? "g" : c.cfnMon >= -puffer ? "y" : "r";
+    if (c.irrImmo === null) P.rendite = c.flowSum >= 0 ? "g" : "r";
+    else if (c.irrEtf === null) P.rendite = c.irrImmo >= 0.05 ? "g" : c.irrImmo >= 0.03 ? "y" : "r";
+    else P.rendite = c.irrImmo >= c.irrEtf ? "g" : c.irrImmo >= c.irrEtf - 0.02 ? "y" : "r";
+    P.risiko = flags.some(f => f.s === "r") ? "r" : flags.some(f => f.s === "y") ? "y" : "g";
+    const vals = Object.values(P);
+    const reds = vals.filter(v => v === "r").length, yel = vals.filter(v => v === "y").length;
+    const verdict = reds >= 2 ? "r" : (reds === 0 && yel <= 1) ? "g" : "y";
+    return { fehlt, P, flags, stress, verdict, puffer };
+  }
+
+  function hoechstpreis(test, p0) {
+    let lo = 1000, hi = Math.max(5000, p0 * 2);
+    if (!test(lo)) return { none: true };
+    if (test(hi)) return { p: hi, above: true };
+    for (let k = 0; k < 30; k++) { const m = (lo + hi) / 2; if (test(m)) lo = m; else hi = m; }
+    return { p: Math.floor(lo / 500) * 500 };
+  }
+
+  return { GREST, LAENDER, II_BV, SZEN, JAHR, calc, bewerten, hoechstpreis, instandRichtwert, fehlend, sanierung, irr, BESICHT_IDS };
+})();
+</script>
+
+<script>
+(function () {
+"use strict";
+const R = Rechner;
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const uid = () => Math.random().toString(36).slice(2, 9) + Date.now().toString(36).slice(-4);
+const pad = n => String(n).padStart(2, "0");
+const has = v => typeof v === "number" && isFinite(v);
+const MINUS = "−";
+const NFC = {};
+const nf = d => NFC[d] || (NFC[d] = new Intl.NumberFormat("de-DE", { minimumFractionDigits: d, maximumFractionDigits: d }));
+function fNum(v, d = 0) {
+  if (v == null || !isFinite(v)) return "–";
+  const p = Math.pow(10, d), r = Math.round(v * p) / p;
+  return (r < 0 ? MINUS : "") + nf(d).format(Math.abs(r));
+}
+const fEur = (v, d = 0) => (v == null || !isFinite(v)) ? "–" : fNum(v, d) + " €";
+const fEurS = v => (v == null || !isFinite(v)) ? "–" : (Math.round(v) > 0 ? "+" : "") + fEur(v);
+const fPct = (v, d = 1) => (v == null || !isFinite(v)) ? "–" : fNum(v, d) + " %";
+const fT = v => {
+  if (v == null || !isFinite(v)) return "–";
+  const a = Math.abs(v);
+  if (a >= 1e6) return fNum(v / 1e6, 2) + " Mio. €";
+  if (a >= 10000) return fNum(v / 1000, 0) + " T€";
+  return fNum(v, 0) + " €";
+};
+function parseNum(s) {
+  s = String(s ?? "").trim().replace(/\s|€|%/g, "").replace(/−/g, "-");
+  if (!s) return null;
+  if (/^-?\d{1,3}(\.\d{3})+(,\d+)?$/.test(s)) s = s.replace(/\./g, "").replace(",", ".");
+  else s = s.replace(",", ".");
+  const v = Number(s);
+  return isFinite(v) ? v : NaN;
+}
+function fmtIn(v, d, grp) {
+  if (v == null || v === "" || !isFinite(v)) return "";
+  const p = Math.pow(10, d);
+  const r = Math.round(v * p) / p;
+  const dec = Math.abs(r % 1) > 1e-9 ? Math.min(d, (String(r).split(".")[1] || "").length) : 0;
+  return new Intl.NumberFormat("de-DE", { minimumFractionDigits: dec, maximumFractionDigits: dec, useGrouping: grp !== false }).format(r);
+}
+const SYM = { g: "✓", y: "!", r: "✕", b: "i" };
+const sym = s => `<span class="sym ${s}" aria-hidden="true">${SYM[s] || "·"}</span>`;
+const WORD = { g: "Grün", y: "Gelb", r: "Rot", b: "Info" };
+function dtg(d) {
+  const off = -d.getTimezoneOffset() / 60;
+  const zone = off === 0 ? "Z" : off > 0 && off <= 9 ? "ABCDEFGHI"[off - 1] : off >= 10 && off <= 12 ? "KLM"[off - 10] : "J";
+  const MON = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+  return pad(d.getDate()) + pad(d.getHours()) + pad(d.getMinutes()) + zone + " " + MON[d.getMonth()] + " " + String(d.getFullYear()).slice(2);
+}
+
+/* ---------- Standardwerte ---------- */
+const DEF_SET = {
+  steuer: 30, puffer: 200, etf: 6, etfSteuer: 18.5, kostenst: 2, vk: 3, halte: 15, zielCf: 0,
+  land: "HE", notar: 1.5, grundbuch: 0.5, makler: 3.57, ausfall: 2, mietst: 2, wertst: 1.5,
+  zins: 4.0, tilg: 2.0, bindung: 10, verwaltung: 30, akNr: 0
+};
+const STATUS = { idee: "Idee", besichtigt: "Besichtigt", verhandlung: "In Verhandlung", gekauft: "Gekauft", abgelehnt: "Abgelehnt" };
+const STATUS_ORDER = ["verhandlung", "besichtigt", "idee", "gekauft", "abgelehnt"];
+const ART = { etw: "Wohnung (ETW)", haus: "Haus", mfh: "Mehrfamilienhaus" };
+const ZUSTAND = { neuwertig: "Neuwertig", gepflegt: "Gepflegt", renovierung: "Renovierungsbedürftig", sanierung: "Sanierungsbedürftig" };
+const ENERGIE = ["A+", "A", "B", "C", "D", "E", "F", "G", "H", "?"];
+const VERDICT = { g: "Kaufen", y: "Verhandeln", r: "Finger weg" };
+const VERDICT_LEAD = {
+  g: "Die Zahlen tragen. Jetzt Unterlagen und Bausubstanz gründlich prüfen, dann zuschlagen.",
+  y: "Das Objekt kann sich lohnen, aber nicht zu diesen Bedingungen. Preis drücken oder Finanzierung anpassen.",
+  r: "Zu diesem Preis rechnet sich das Objekt nicht. Weitersuchen spart Geld und Nerven."
+};
+
+function newObject() {
+  const s = S.settings;
+  return {
+    id: uid(), ak: "", name: "", status: "idee", notes: "", created: Date.now(), updatedAt: Date.now(),
+    adresse: "", land: s.land || "HE", art: "etw", baujahr: null, flaeche: null, zimmer: null, einheiten: 1, zustand: "gepflegt", energie: "?",
+    marktQm: null, preis: null, stellplatz: 0, inventar: 0, bodenProz: 20, bodenrichtwert: null, grundstueck: null,
+    grest: null, notar: s.notar, grundbuch: s.grundbuch, makler: s.makler, gutachter: 0, sanEin: true,
+    miete: null, vergleichQm: null, mietst: s.mietst, wertst: s.wertst, hausgeld: null, verwaltung: s.verwaltung, instand: null, ausfall: s.ausfall,
+    ek: null, zins: s.zins, tilg: s.tilg, bindung: s.bindung, sonder: 0, anschluss: null,
+    kfwOn: false, kfwBetrag: 0, kfwZins: 3.0, kfwTilg: 2.0, kfwBindung: 10,
+    checks: {}, costs: {}, ruecklage: null
+  };
+}
+function normObj(o) {
+  const base = newObject();
+  const out = Object.assign(base, o || {});
+  if (!out.checks || typeof out.checks !== "object") out.checks = {};
+  if (!out.costs || typeof out.costs !== "object") out.costs = {};
+  return out;
+}
+
+/* Beispielobjekt: fiktiv, wird nicht gespeichert */
+function makeSample() {
+  const o = normObj({
+    id: "beispiel", ak: "OA-BEISPIEL", name: "2-Zimmer-Wohnung, Kassel", status: "besichtigt",
+    notes: "Fiktives Beispiel mit realistischen Werten für Kassel (Stand Oktober 2026).",
+    adresse: "Musterstraße 12, Kassel-Rothenditmold", land: "HE", art: "etw", baujahr: 1962, flaeche: 58, zimmer: 2, einheiten: 1,
+    zustand: "gepflegt", energie: "D", marktQm: 2150,
+    preis: 112000, stellplatz: 0, inventar: 0, bodenProz: 20,
+    notar: 1.5, grundbuch: 0.5, makler: 3.57, gutachter: 0, sanEin: true,
+    miete: 505, vergleichQm: 8.3, mietst: 2, wertst: 1.5, hausgeld: 85, verwaltung: 30, instand: null, ausfall: 2,
+    ek: 38000, zins: 4.0, tilg: 2.0, bindung: 10, sonder: 0, anschluss: null,
+    checks: {
+      bev: "ok", arb: "ok", alq: "mangel", kk: "ok", nach: "ok", vk: "ok", leer: "ok", mpb: "ok",
+      oepnv: "ok", eink: "ok", schule: "ok", laerm: "mangel", umfeld: "ok", park: "ok", hw: "ok", lageHaus: "ok",
+      dach: "ok", decke: "ok", eindeckung: "ok", feucht: "ok", schimmel: "ok", fenster: "mangel", heizung: "ok", elektrik: "mangel",
+      leitungen: "ok", bad: "ok", fassade: "ok", schadstoff: "ok", balkon: "ok",
+      teilung: "ok", protokolle: "ok", beschluss: "ok", wplan: "ok", ruecklage: "ok", energieausweis: "ok", grundbuch: "ok"
+    },
+    costs: { fenster: 1500, elektrik: 2500 },
+    ruecklage: 1450
+  });
+  return o;
+}
+
+/* ---------- Zustand ---------- */
+const STORE_KEY = "objektakte.v1";
+const VIEW_KEY = "objektakte.view";
+let S = { objects: [], settings: Object.assign({}, DEF_SET), settingsUpdatedAt: 0 };
+let syncedIds = new Set();
+const deletedIds = new Set();
+try {
+  const raw = localStorage.getItem(STORE_KEY);
+  if (raw) {
+    const d = JSON.parse(raw);
+    S.objects = Array.isArray(d.objects) ? d.objects.map(normObj) : [];
+    S.settings = Object.assign({}, DEF_SET, d.settings || {});
+    S.settingsUpdatedAt = d.settingsUpdatedAt || 0;
+    syncedIds = new Set(Array.isArray(d.synced) ? d.synced : []);
+  }
+} catch (e) {}
+let SAMPLE = makeSample();
+let V = { tab: "objekte", obj: null, sub: "urteil", horizon: 20, cmp: [] };
+try { const v = JSON.parse(localStorage.getItem(VIEW_KEY) || "null"); if (v && typeof v === "object") V = Object.assign(V, v, { obj: null }); } catch (e) {}
+
+function writeLocal() {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify({ objects: S.objects, settings: S.settings, settingsUpdatedAt: S.settingsUpdatedAt, synced: [...syncedIds] })); } catch (e) {}
+}
+function saveView() { try { localStorage.setItem(VIEW_KEY, JSON.stringify({ tab: V.tab, sub: V.sub, horizon: V.horizon, cmp: V.cmp })); } catch (e) {} }
+const getObj = id => id === "beispiel" ? SAMPLE : S.objects.find(o => o.id === id);
+const isSample = o => o && o.id === "beispiel";
+
+/* ---------- Speicher: privat im Konto (db) mit lokalem Spiegel ---------- */
+let COL = null, downloads = null;
+const docTimers = new Map(), docBusy = new Map();
+function setSync(on) {
+  const el = $("#sync"); if (!el) return;
+  el.classList.toggle("on", on);
+  el.querySelector("span").textContent = on ? "Synchron" : "Nur dieses Gerät";
+  el.title = on ? "Deine Objekte liegen privat in deinem Konto" : "Daten liegen nur in diesem Browser";
+}
+let syncOn = false;
+function scheduleWrite(docId, delay) {
+  clearTimeout(docTimers.get(docId));
+  docTimers.set(docId, setTimeout(() => { docTimers.delete(docId); flushDoc(docId, 0); }, delay ?? 700));
+}
+async function flushDoc(docId, tries) {
+  if (!COL) return;
+  let st = docBusy.get(docId);
+  if (!st) { st = { writing: false, again: false }; docBusy.set(docId, st); }
+  if (st.writing) { st.again = true; return; }
+  st.writing = true;
+  let retry = false;
+  try {
+    if (docId === "settings") {
+      await COL.doc("settings").set({ values: Object.assign({}, S.settings), updatedAt: S.settingsUpdatedAt || Date.now() });
+    } else {
+      const oid = docId.slice(2), o = S.objects.find(x => x.id === oid);
+      if (!o) await COL.doc(docId).delete();
+      else await COL.doc(docId).set({ obj: JSON.parse(JSON.stringify(o)), updatedAt: o.updatedAt || Date.now() });
+    }
+  } catch (e) {
+    const code = e && e.code;
+    if (code === "quota_exceeded") toast("Speicher voll: alte Objekte löschen");
+    else if (code === "revoked") { COL = null; syncOn = false; setSync(false); }
+    else if ((code === "unavailable" || code === "resource_exhausted") && tries < 3) retry = true;
+  }
+  st.writing = false;
+  if (st.again || retry) { st.again = false; setTimeout(() => flushDoc(docId, retry ? tries + 1 : 0), 500 + Math.random() * 800); }
+}
+function touch(o) {
+  VER++;
+  if (isSample(o)) return;
+  o.updatedAt = Date.now();
+  writeLocal();
+  scheduleWrite("o_" + o.id);
+}
+function touchSettings() {
+  VER++;
+  S.settingsUpdatedAt = Date.now();
+  writeLocal();
+  scheduleWrite("settings");
+}
+async function connect() {
+  setSync(false);
+  if (!window.claude || typeof window.claude.use !== "function") return;
+  try {
+    window.claude.use("downloads").then(d => { downloads = d; if (d) safeRender(); }).catch(() => {});
+    const [db, user] = await Promise.all([window.claude.use("db"), window.claude.use("user")]);
+    if (!db || !user) return;
+    const id = await user.id();
+    if (!id) return;
+    COL = db.collection("data/users/" + id);
+    let first = true;
+    COL.onSnapshot(qs => {
+      let changed = false;
+      const remote = new Set(qs.docs.map(d => d.id));
+      qs.docs.forEach(d => {
+        if (d.metadata && d.metadata.hasPendingWrites) return;
+        const data = d.data(); if (!data) return;
+        if (d.id === "settings") {
+          if ((data.updatedAt || 0) > (S.settingsUpdatedAt || 0)) { S.settings = Object.assign({}, DEF_SET, data.values || {}); S.settingsUpdatedAt = data.updatedAt; changed = true; }
+          return;
+        }
+        if (d.id.slice(0, 2) !== "o_") return;
+        const oid = d.id.slice(2);
+        if (deletedIds.has(oid)) return;
+        syncedIds.add(oid);
+        const local = S.objects.find(x => x.id === oid);
+        if (!local) { S.objects.push(normObj(data.obj)); changed = true; }
+        else if ((data.updatedAt || 0) > (local.updatedAt || 0)) { Object.assign(local, normObj(data.obj)); changed = true; }
+      });
+      const before = S.objects.length;
+      S.objects = S.objects.filter(o => {
+        if (remote.has("o_" + o.id)) return true;
+        const busy = docTimers.has("o_" + o.id) || (docBusy.get("o_" + o.id) || {}).writing;
+        if (syncedIds.has(o.id) && !busy) { syncedIds.delete(o.id); return false; }
+        return true;
+      });
+      if (S.objects.length !== before) changed = true;
+      if (first) {
+        first = false;
+        S.objects.forEach(o => { if (!remote.has("o_" + o.id)) scheduleWrite("o_" + o.id, 60); });
+        if (!remote.has("settings") && S.settingsUpdatedAt) scheduleWrite("settings", 60);
+      }
+      syncOn = true; setSync(true);
+      if (changed) { VER++; writeLocal(); safeRender(); }
+    }, () => { COL = null; syncOn = false; setSync(false); });
+  } catch (e) { setSync(false); }
+}
+
+/* ---------- Bewertung je Objekt ---------- */
+let VER = 0;
+const EVC = new WeakMap();
+function evaluate(o) {
+  const hit = EVC.get(o);
+  if (hit && hit.ver === VER) return hit.r;
+  const c = R.calc(o, S.settings);
+  const b = R.bewerten(o, S.settings, c);
+  const r = { c, b };
+  EVC.set(o, { ver: VER, r });
+  return r;
+}
+function hints(o, c, b) {
+  const H = [];
+  const A = S.settings;
+  if (c.L1 > 0 && c.d1.restBind != null && Math.round(o.bindung) < 50) {
+    const pct = c.d1.restBind / c.L1 * 100;
+    if (pct > 75) H.push({ s: "y", t: `Nach ${Math.round(o.bindung)} Jahren sind noch ${fNum(pct, 0)} % der Schuld offen. Mehr Tilgung senkt das Anschlussrisiko.` });
+  }
+  if (has(o.instand) && o.instand < 0.8 * c.instandRichtwert) H.push({ s: "y", t: `Instandhaltung unter dem Richtwert von ${fNum(c.instandRichtwert, 2)} €/m²: zu wenig Rücklage eingeplant.` });
+  if (!(o.verwaltung > 0)) H.push({ s: "b", t: "Du wirst versetzt (Kassel → Calw). Plane eine Mietverwaltung ein, etwa 25–40 € pro Einheit und Monat." });
+  if (c.ekEff < c.nk) H.push({ s: "y", t: "Dein Eigenkapital deckt die Kaufnebenkosten nicht. Banken verlangen dann deutlich höhere Zinsen." });
+  if (c.ekUeber > 0) H.push({ s: "b", t: `Eigenkapital übersteigt die Gesamtinvestition um ${fEur(c.ekUeber)}. Der Überschuss ist nicht eingerechnet.` });
+  if (A.halte < 10) H.push({ s: "y", t: "Haltedauer unter 10 Jahren: Der Verkaufsgewinn wäre steuerpflichtig (Spekulationsfrist)." });
+  if (o.ausfall < 2) H.push({ s: "y", t: "Mietausfallwagnis unter 2 % ist optimistisch. Die II. BV rechnet mit 2 %." });
+  if (o.vergleichQm > 0 && o.flaeche > 0) {
+    const ratio = (o.miete / o.flaeche) / o.vergleichQm;
+    if (ratio < 0.9) H.push({ s: "b", t: `Miete ${fNum((1 - ratio) * 100, 0)} % unter der Vergleichsmiete: Erhöhungspotenzial (Kappungsgrenze 15–20 % in 3 Jahren).` });
+  }
+  if (c.anschaffungsnah) H.push({ s: "b", t: "Sanierung über 15 % der Gebäudekosten: Sie zählt als anschaffungsnaher Aufwand und wird über die AfA abgeschrieben." });
+  else if (c.sofort > 0) H.push({ s: "g", t: `Sanierung unter der 15-%-Grenze: sofort absetzbar. Einmalige Steuerersparnis im ersten Jahr: rund ${fEur(c.sofortEffekt)}.` });
+  if (c.bodenAnteil > 0.4) H.push({ s: "b", t: `Hoher Bodenanteil (${fNum(c.bodenAnteil * 100, 0)} %). Boden wird nicht abgeschrieben, die AfA fällt kleiner aus.` });
+  if (c.payoff === null || c.payoff > 35) H.push({ s: "y", t: c.payoff === null ? "Mit dieser Tilgung ist der Kredit in 50 Jahren nicht abbezahlt." : `Schuldenfrei erst nach ${c.payoff} Jahren. Höhere Tilgung verkürzt das deutlich.` });
+  const prog = checkProgress(o);
+  if (prog.done < prog.total) H.push({ s: "b", t: `Objekt-Check: ${prog.done} von ${prog.total} Punkten geprüft.` });
+  return H;
+}
+
+/* ---------- Checklisten ---------- */
+const CHECK = {
+  makro: { t: "Makrolage: Stadt und Region", items: [
+    ["bev", "Bevölkerung stabil oder wachsend", "Prognose bis 2040: Statistisches Landesamt oder Wegweiser Kommune"],
+    ["arb", "Mehrere große Arbeitgeber, gemischte Branchen", "Hängt die Stadt an einem Werk, ist das ein Klumpenrisiko"],
+    ["alq", "Arbeitslosenquote nicht über dem Bundesschnitt", "Kreisdaten der Bundesagentur für Arbeit"],
+    ["kk", "Kaufkraft und Einkommen stabil", ""],
+    ["nach", "Feste Mieternachfrage: Hochschule, Klinik, Behörden, Bundeswehr", ""],
+    ["vk", "Gute Anbindung an Autobahn und Bahn", ""],
+    ["leer", "Wenig Leerstand (unter 3 %)", "Zensus 2022 oder Wohnungsmarktbericht der Stadt"],
+    ["mpb", "Mietpreisbremse und Kappungsgrenze am Ort geprüft", "Landesverordnung nachlesen"]
+  ] },
+  mikro: { t: "Mikrolage: Straße und Viertel", items: [
+    ["oepnv", "Bus oder Bahn in 5–10 Minuten zu Fuß", ""],
+    ["eink", "Einkauf, Ärzte, Apotheke fußläufig", ""],
+    ["schule", "Schulen und Kitas in der Nähe", ""],
+    ["laerm", "Kein Lärm durch Hauptstraße, Bahn, Gewerbe oder Flugschneise", "Zu verschiedenen Tageszeiten hingehen"],
+    ["umfeld", "Gepflegtes Umfeld, guter Ruf des Viertels", "Auch abends und am Wochenende ansehen"],
+    ["park", "Parkplatzsituation in Ordnung", ""],
+    ["hw", "Kein Hochwasser- oder Starkregenrisiko", "Hochwassergefahrenkarte des Landes"],
+    ["lageHaus", "Lage im Haus: Etage, Licht, Ausrichtung", ""]
+  ] },
+  besicht: { t: "Besichtigung mit dem Blick des Zimmerers", cost: true, items: [
+    ["dach", "Dachstuhl", "Sparren, Pfetten, Verbindungen: Risse, Durchbiegung, Fraßspuren (Hausbock: ovale Ausfluglöcher, Bohrmehl)"],
+    ["decke", "Holzbalkendecken", "Balkenköpfe an den Außenwänden auf Fäulnis prüfen, Durchbiegung, Schwingen beim Gehen"],
+    ["eindeckung", "Dacheindeckung und Dämmung", "Ziegel, Unterspannbahn, Dämmung der obersten Geschossdecke"],
+    ["feucht", "Feuchtigkeit in Keller und Sockel", "Salzausblühungen, abplatzender Putz, muffiger Geruch, fehlende Horizontalsperre"],
+    ["schimmel", "Schimmel", "Fensterlaibungen, Außenwandecken, hinter Schränken, Bad"],
+    ["fenster", "Fenster", "Baujahr, Verglasung, Dichtungen, Anstrich bei Holzfenstern, Rollläden"],
+    ["heizung", "Heizung", "Art, Baujahr, Wartungsprotokoll. Alte Konstanttemperaturkessel über 30 Jahre müssen raus"],
+    ["elektrik", "Elektrik", "Zählerschrank, FI-Schutzschalter, zweiadrige Leitungen ohne Schutzleiter"],
+    ["leitungen", "Wasser- und Abwasserleitungen", "Bleirohre (bis 1973 verbaut), verzinkte Stahlrohre, Grundleitung"],
+    ["bad", "Bad und Sanitär", "Alter, Fliesen, Abdichtung, Fugen, Lüftung"],
+    ["fassade", "Fassade und Außenwände", "Setzrisse, Putzschäden, Dämmung"],
+    ["schadstoff", "Schadstoffe", "Asbest (Bauzeit 1960–1993: Floor-Flex-Platten, Kleber), Holzschutzmittel wie PCP oder Lindan im Dachstuhl"],
+    ["balkon", "Balkon und Treppenhaus", "Abdichtung, Geländer, Betonabplatzungen"],
+    ["sonst", "Weitere Maßnahmen", "Böden, Malerarbeiten, Küche, Türen: Kosten unten eintragen"]
+  ] },
+  etw: { t: "Unterlagen der Eigentümergemeinschaft", items: [
+    ["teilung", "Teilungserklärung und Gemeinschaftsordnung", "Sondernutzungsrechte, Kostenverteilung, Nutzungsbeschränkungen"],
+    ["protokolle", "Protokolle der Eigentümerversammlungen (3 Jahre)", "Geplante Sanierungen, Sonderumlagen, Streit in der Gemeinschaft"],
+    ["beschluss", "Beschlusssammlung", ""],
+    ["wplan", "Wirtschaftsplan und Jahresabrechnung", "Hausgeld: umlagefähiger und nicht umlagefähiger Teil"],
+    ["ruecklage", "Höhe der Erhaltungsrücklage", "Deinen Anteil unten eintragen"],
+    ["energieausweis", "Energieausweis", "Muss spätestens bei der Besichtigung vorliegen"],
+    ["grundbuch", "Grundbuchauszug", "Lasten in Abteilung II: Wegerecht, Nießbrauch, Vorkaufsrecht"],
+    ["mietvertrag", "Mietvertrag, falls vermietet", "Miethöhe, letzte Erhöhung, Kaution, Rückstände"]
+  ] },
+  haus: { t: "Unterlagen zum Haus", items: [
+    ["grundbuch", "Grundbuchauszug", "Lasten in Abteilung II: Wegerecht, Nießbrauch, Vorkaufsrecht"],
+    ["baulast", "Baulastenverzeichnis", "Abstandsflächen, Zufahrten, Stellplätze"],
+    ["altlast", "Altlastenkataster", ""],
+    ["flurkarte", "Flurkarte und Grundstücksgrenzen", ""],
+    ["baugen", "Baugenehmigung und Pläne", "Sind Ausbauten wie das Dachgeschoss genehmigt?"],
+    ["energieausweis", "Energieausweis", "Muss spätestens bei der Besichtigung vorliegen"],
+    ["mietvertrag", "Mietverträge und Mieterliste", "Miethöhen, Kautionen, Rückstände"],
+    ["nkabr", "Letzte Betriebskostenabrechnungen", ""]
+  ] }
+};
+function checkGroups(o) { return ["makro", "mikro", "besicht", o.art === "etw" ? "etw" : "haus"]; }
+function checkProgress(o) {
+  let total = 0, done = 0, ok = 0, m = 0, k = 0;
+  checkGroups(o).forEach(g => CHECK[g].items.forEach(([id]) => {
+    if (id === "sonst") return;
+    total++;
+    const s = (o.checks || {})[id];
+    if (s) { done++; if (s === "ok") ok++; else if (s === "mangel") m++; else if (s === "krit") k++; }
+  }));
+  return { total, done, ok, m, k };
+}
+
+/* ---------- Glossar ---------- */
+const G = {
+  urteil: ["Urteil", "Vier Prüfpunkte, je mit Ampel: Preis (Kaufpreisfaktor), Liquidität (Cashflow nach Steuern gegen deinen Puffer), Rendite (Eigenkapitalrendite gegen ETF) und Risiko (Warnungen aus Daten und Objekt-Check). Kaufen: kein Rot und höchstens ein Gelb. Finger weg: zwei oder mehr Rot. Sonst: Verhandeln."],
+  faktor: ["Kaufpreisfaktor", "Kaufpreis geteilt durch die Jahreskaltmiete. Er sagt, wie viele Jahre die Miete braucht, um den Kaufpreis einzuspielen. Faustregel für Kapitalanleger: bis 20 gut, 20 bis 25 teuer, über 25 nur in Toplagen mit starkem Mietwachstum vertretbar."],
+  brutto: ["Bruttomietrendite", "Jahreskaltmiete geteilt durch den Kaufpreis. Sie ist der Kehrwert des Faktors (Faktor 20 = 5 %). Ohne Nebenkosten und laufende Kosten, deshalb nur für den schnellen Vergleich."],
+  netto: ["Nettomietrendite", "Jahresreinertrag (Miete minus Mietausfall, Hausgeld, Verwaltung und Instandhaltung) geteilt durch die Gesamtinvestition mit Nebenkosten. Liegt sie über deinem Kreditzins, arbeitet die Finanzierung für dich."],
+  hebel: ["Hebeleffekt", "Mit Kredit steigt die Rendite auf dein Eigenkapital, solange die Immobilie mehr abwirft, als der Kredit kostet. Liegt der Zins über der Nettomietrendite, kehrt sich der Hebel um und frisst Rendite."],
+  cashflow: ["Cashflow", "Was dir im Monat bleibt: Miete minus alle Kosten, Zinsen und Tilgung. Vor Steuern ohne, nach Steuern mit der Wirkung auf deine Einkommensteuer. Negativ heißt: Du zahlst jeden Monat zu. Die Objektakte zeigt das erste volle Jahr ohne Einmaleffekte."],
+  irr: ["Eigenkapitalrendite p. a.", "Interner Zinsfuß deines Eigenkapitals über die Haltedauer: Einsatz, alle Zuzahlungen und Überschüsse sowie der Verkaufserlös nach Kosten, Steuer und Restschuld. So wird die Immobilie direkt mit einem ETF-Sparplan vergleichbar."],
+  dscr: ["Kapitaldienstdeckung", "Reinertrag geteilt durch den Kapitaldienst (Zins und Tilgung). Ab 1,0 deckt die Miete die Kreditrate, ab 1,2 mit Puffer. Banken prüfen bei Privatleuten zusätzlich dein Gehalt."],
+  puffer: ["Monatlicher Puffer", "So viel kannst und willst du im Monat aus deinem Gehalt zuschießen, ohne dass es eng wird. Er entscheidet, ab wann ein negativer Cashflow rot wird. Einstellbar unter Annahmen."],
+  gesamt: ["Gesamtinvestition", "Kaufpreis, Stellplatz und Inventar plus Kaufnebenkosten plus, wenn eingeschaltet, der Sanierungsstau aus dem Objekt-Check. Diesen Betrag müssen Eigenkapital und Kredit zusammen stemmen."],
+  nk: ["Kaufnebenkosten", "Grunderwerbsteuer, Notar, Grundbuch und Makler, zusammen meist 9 bis 15 % des Kaufpreises. Das Geld ist sofort weg und steigert keinen Wiederverkaufswert. Banken wollen es meist aus Eigenkapital bezahlt sehen."],
+  grest: ["Grunderwerbsteuer", "Steuer des Bundeslandes auf den Kaufpreis: 3,5 % in Bayern bis 6,5 % in Brandenburg, NRW, Saarland und Schleswig-Holstein (Stand Oktober 2026). Inventar wie eine Einbauküche bleibt steuerfrei, wenn es im Kaufvertrag mit realistischem Wert getrennt steht."],
+  boden: ["Bodenanteil und Bodenrichtwert", "Grund und Boden nutzen sich nicht ab und werden nicht abgeschrieben. Den Bodenwert schätzt du mit Bodenrichtwert mal Grundstücksfläche, bei Wohnungen mit deinem Miteigentumsanteil. Bodenrichtwerte gibt es kostenlos bei BORIS. Das Finanzamt nutzt oft die Arbeitshilfe des Bundesfinanzministeriums zur Kaufpreisaufteilung."],
+  afa: ["AfA (Abschreibung)", "Der Gebäudeanteil samt anteiliger Nebenkosten wird jährlich abgesetzt: 2 % bei Baujahr 1925 bis 2022, 2,5 % vor 1925, 3 % ab 2023. Inventar wie eine Einbauküche über 10 Jahre. Bei alten Häusern kann ein Gutachten zur kürzeren Restnutzungsdauer eine höhere AfA bringen. Mit Steuerberater klären."],
+  anschaffungsnah: ["Anschaffungsnaher Aufwand", "Sanierst du in den ersten drei Jahren nach dem Kauf für mehr als 15 % der Gebäudekosten (ohne Umsatzsteuer), musst du die Kosten über die AfA verteilen. Darunter sind sie sofort als Werbungskosten absetzbar. Die Objektakte prüft das automatisch."],
+  werbung: ["Werbungskosten und Verlustverrechnung", "Zinsen, AfA, nicht umlagefähiges Hausgeld, Verwaltung und Reparaturen mindern dein Ergebnis aus Vermietung. Ein Verlust wird mit deinem Sold verrechnet und bringt Steuern zurück. Tipp: Beim Finanzamt einen Freibetrag eintragen lassen, dann wirkt der Vorteil schon monatlich auf der Gehaltsabrechnung."],
+  grenz: ["Grenzsteuersatz", "Der Steuersatz auf jeden zusätzlichen Euro Einkommen, nicht dein Durchschnittssatz. Bei rund 30.000 € zu versteuerndem Einkommen liegt er bei etwa 28 %, mit Kirchensteuer bei rund 30 %. Dein letzter Steuerbescheid oder ein Steuerrechner hilft."],
+  speku: ["Spekulationsfrist", "Verkaufst du eine vermietete Immobilie innerhalb von 10 Jahren nach dem Kauf (maßgeblich sind die Daten der Notarverträge), versteuerst du den Gewinn mit deinem persönlichen Satz. Die genutzte AfA erhöht dabei den Gewinn. Danach ist der Verkauf steuerfrei."],
+  bindung: ["Sollzinsbindung", "So lange ist dein Zins fest. Danach brauchst du eine Anschlussfinanzierung zum dann gültigen Zins. Das ist das größte Risiko jeder Finanzierung. Längere Bindung kostet etwas mehr Zins, kauft aber Planungssicherheit."],
+  anschluss: ["Anschlusszins", "Deine Annahme für den Zins nach der Zinsbindung. Leer heißt: wie heute. Die Objektakte rechnet die Rate dann so neu, dass der Kredit zum ursprünglich geplanten Zeitpunkt getilgt ist. Der Stresstest zeigt +2 und +4 Prozentpunkte."],
+  sonder: ["Sondertilgung", "Freiwillige Extrazahlung, oft bis 5 % der Darlehenssumme pro Jahr kostenlos vereinbar. Sie senkt Restschuld und Zinskosten, bindet aber Geld. Die Objektakte zieht sie in Vermögens- und Renditerechnung als Auszahlung ab."],
+  restschuld: ["Restschuld", "Was du am Ende der Zinsbindung noch schuldest. Je höher, desto härter trifft dich ein steigender Zins. Mit 2 % Anfangstilgung und 4 % Zins sind nach 10 Jahren noch rund drei Viertel offen."],
+  annuitaet: ["Annuität und Tilgung", "Die Rate bleibt gleich, der Zinsanteil sinkt mit jeder Zahlung, der Tilgungsanteil steigt. Die Anfangstilgung bestimmt das Tempo: Bei 4 % Zins bist du mit 2 % Tilgung nach rund 28 Jahren schuldenfrei, mit 3 % nach rund 22 Jahren."],
+  kfw: ["KfW und zweites Darlehen", "Förderkredite der staatlichen KfW. Für Kapitalanleger kommen vor allem Kredite für energetische Sanierung oder effiziente Neubauten in Frage, teils mit Tilgungszuschuss. Das Wohneigentumsprogramm gilt nur für Selbstnutzer. Das Feld eignet sich auch für ein Bausparvorhaben oder Verwandtendarlehen."],
+  hausgeld: ["Hausgeld", "Monatliche Zahlung an die Eigentümergemeinschaft. Der umlagefähige Teil (Heizung, Wasser, Müll, Hausmeister, Versicherung) geht über die Nebenkosten an den Mieter. Deine Kosten bleiben Verwalterhonorar, Erhaltungsrücklage und Bankgebühren. Beides steht in der Jahresabrechnung."],
+  instand: ["Instandhaltung", "Geld für Reparaturen, das du selbst einplanst. Richtwerte nach § 28 II. BV ab 2026 je m² und Jahr: 11,50 € (unter 22 Jahre), 14,58 € (ab 22 Jahre), 18,62 € (ab 32 Jahre). Bei Wohnungen steckt die Rücklage fürs Gemeinschaftseigentum schon im Hausgeld. Für dein Sondereigentum rechnet die Objektakte deshalb mit der Hälfte. Leer lassen heißt: Richtwert."],
+  ausfall: ["Mietausfallwagnis", "Pauschale für Leerstand, Mietrückstände und Prozesskosten. Die II. BV setzt 2 % der Jahresmiete an, bei schwieriger Lage oder Mieterschaft mehr."],
+  verwaltung: ["Mietverwaltung", "Bei Wohnungen kümmert sich die WEG-Verwaltung ums Gemeinschaftseigentum, bezahlt über das Hausgeld. Für Mieterkontakt, Nebenkostenabrechnung und Übergaben brauchst du, gerade bei Versetzungen, eine Mietverwaltung: etwa 25 bis 40 € pro Einheit und Monat."],
+  vergleich: ["Ortsübliche Vergleichsmiete", "Was für vergleichbare Wohnungen am Ort gezahlt wird, steht im Mietspiegel der Stadt. Mit Mietpreisbremse darf eine neue Miete höchstens 10 % darüber liegen. Bestehende Mieten dürfen in 3 Jahren um höchstens 20 % steigen, in angespannten Märkten 15 %, und nie über die Vergleichsmiete."],
+  ruecklage: ["Erhaltungsrücklage", "Gemeinsames Sparkonto der Eigentümer für Dach, Fassade, Heizung und Co. Ist sie zu klein, drohen Sonderumlagen von mehreren Tausend Euro auf einen Schlag. Gleiche sie mit den Maßnahmen ab, die in den Protokollen angekündigt sind."],
+  energie: ["Energieklasse", "Aus dem Energieausweis, von A+ bis H. Schlechte Klassen bedeuten hohe Heizkosten für Mieter, Modernisierungsdruck und einen höheren Anteil an den CO₂-Kosten für dich als Vermieter, bis zu 95 %. Die Vorgaben des Gebäudeenergiegesetzes ändern sich gerade. Stand vor dem Kauf prüfen."],
+  etf: ["ETF-Vergleich", "Was wäre, wenn du dasselbe Geld in einen breit gestreuten Aktien-ETF steckst: das Eigenkapital zu Beginn und jede Zuzahlung? Standard: 6 % pro Jahr vor Steuern. Gewinne werden bei Auszahlung mit rund 18,5 % besteuert (Abgeltungsteuer und Soli auf 70 % des Gewinns bei Aktienfonds)."],
+  szenarien: ["Szenarien", "Pessimistisch: Wertsteigerung 1,5 Punkte niedriger, Mietsteigerung 1 Punkt niedriger, Anschlusszins 2 Punkte höher, Mietausfall 2 Punkte höher, Kosten steigen 0,5 Punkte schneller. Optimistisch: Wert 1 Punkt höher, Miete 0,5 Punkte höher, Anschlusszins 0,5 Punkte niedriger, Mietausfall 1 Punkt niedriger. Realistisch: deine Eingaben."],
+  stresstest: ["Stresstest", "Zeigt Rate und Cashflow nach der Zinsbindung, falls der Zins dann 2 oder 4 Prozentpunkte höher ist als angenommen. Zur Einordnung: 2008 lagen Bauzinsen bei rund 5 %, Anfang der 1990er bei über 9 %."],
+  hoechstpreis: ["Höchstpreis", "Der höchste Kaufpreis, bei dem dein Cashflow nach Steuern dein Ziel noch erreicht (Standard 0 €: Die Immobilie trägt sich selbst). Darunter der Preis, ab dem das Urteil auf Kaufen springt. Eigenkapital und Finanzierung bleiben dabei gleich."],
+  ek: ["Eigenkapital", "Dein eigenes Geld im Kauf. Mindestens die Nebenkosten sollten daraus kommen, sonst steigen die Zinsen deutlich. Mehr Eigenkapital senkt Rate und Risiko, drückt aber oft die Eigenkapitalrendite."],
+  vk: ["Verkaufskosten", "Makler, Notar und Sonstiges beim späteren Verkauf. Standard: 3 % des Verkaufspreises."],
+  soldat: ["Als Soldat finanzieren", "Bei Soldaten auf Zeit schauen Banken genau auf das Dienstzeitende: Was kommt danach, wie sicher ist das Einkommen? Berufssoldaten werden ähnlich wie Beamte eingestuft. Versetzungen machen eine Mietverwaltung sinnvoll."]
+};
+const ib = k => G[k] ? `<button type="button" class="ibtn" data-act="gloss" data-k="${k}" aria-label="Erklärung: ${esc(G[k][0])}">i</button>` : "";
+
+/* ---------- Felder ---------- */
+const F = {
+  name: { l: "Bezeichnung", text: 1, ph: "z. B. 3-Zi-Wohnung Wehlheiden" },
+  adresse: { l: "Adresse", text: 1, ph: "Straße, Ort" },
+  baujahr: { l: "Baujahr", d: 0, grp: false, g: "afa" },
+  flaeche: { l: "Wohnfläche", u: "m²", d: 1 },
+  zimmer: { l: "Zimmer", d: 1 },
+  einheiten: { l: "Wohneinheiten", d: 0 },
+  marktQm: { l: "Marktpreis Vergleich", u: "€/m²", d: 0, ph: "optional" },
+  preis: { l: "Kaufpreis", u: "€", d: 0, g: "faktor" },
+  stellplatz: { l: "Stellplatz / Garage", u: "€", d: 0 },
+  inventar: { l: "Inventar (Einbauküche)", u: "€", d: 0, g: "grest" },
+  bodenProz: { l: "Bodenanteil", u: "%", d: 1, g: "boden" },
+  bodenrichtwert: { l: "Bodenrichtwert", u: "€/m²", d: 0, ph: "optional", g: "boden" },
+  grundstueck: { l: "Grundstück / Anteil", u: "m²", d: 1, ph: "optional", g: "boden" },
+  grest: { l: "Grunderwerbsteuer", u: "%", d: 2, g: "grest" },
+  notar: { l: "Notar", u: "%", d: 2 },
+  grundbuch: { l: "Grundbuch", u: "%", d: 2 },
+  makler: { l: "Makler", u: "%", d: 2 },
+  gutachter: { l: "Gutachter", u: "€", d: 0 },
+  miete: { l: "Kaltmiete", u: "€/Mon.", d: 0, g: "cashflow" },
+  vergleichQm: { l: "Vergleichsmiete", u: "€/m²", d: 2, ph: "Mietspiegel", g: "vergleich" },
+  mietst: { l: "Mietsteigerung", u: "% p. a.", d: 1 },
+  wertst: { l: "Wertsteigerung", u: "% p. a.", d: 1 },
+  hausgeld: { l: "Hausgeld, nicht umlagefähig", u: "€/Mon.", d: 0, g: "hausgeld" },
+  verwaltung: { l: "Mietverwaltung", u: "€/Mon.", d: 0, g: "verwaltung" },
+  instand: { l: "Instandhaltung", u: "€/m² p. a.", d: 2, g: "instand" },
+  ausfall: { l: "Mietausfall", u: "%", d: 1, g: "ausfall" },
+  ek: { l: "Eigenkapital", u: "€", d: 0, g: "ek" },
+  zins: { l: "Sollzins", u: "%", d: 2, g: "bindung" },
+  tilg: { l: "Anfangstilgung", u: "%", d: 2, g: "annuitaet" },
+  bindung: { l: "Zinsbindung", u: "Jahre", d: 0, g: "bindung" },
+  sonder: { l: "Sondertilgung", u: "% p. a.", d: 1, g: "sonder" },
+  anschluss: { l: "Anschlusszins", u: "%", d: 2, g: "anschluss" },
+  kfwBetrag: { l: "Betrag", u: "€", d: 0 },
+  kfwZins: { l: "Zins", u: "%", d: 2 },
+  kfwTilg: { l: "Tilgung", u: "%", d: 2 },
+  kfwBindung: { l: "Zinsbindung", u: "Jahre", d: 0 },
+  ruecklage: { l: "Erhaltungsrücklage, dein Anteil", u: "€", d: 0, ph: "aus der Jahresabrechnung", g: "ruecklage" },
+  "s.steuer": { l: "Grenzsteuersatz", u: "%", d: 1, g: "grenz" },
+  "s.puffer": { l: "Monatlicher Puffer", u: "€/Mon.", d: 0, g: "puffer" },
+  "s.zielCf": { l: "Ziel-Cashflow für Höchstpreis", u: "€/Mon.", d: 0, g: "hoechstpreis" },
+  "s.etf": { l: "ETF-Rendite vor Steuern", u: "% p. a.", d: 1, g: "etf" },
+  "s.etfSteuer": { l: "Steuer auf ETF-Gewinne", u: "%", d: 1, g: "etf" },
+  "s.kostenst": { l: "Kostensteigerung", u: "% p. a.", d: 1 },
+  "s.vk": { l: "Verkaufskosten", u: "%", d: 1, g: "vk" },
+  "s.halte": { l: "Haltedauer für Rendite", u: "Jahre", d: 0, g: "speku" },
+  "s.notar": { l: "Notar", u: "%", d: 2 },
+  "s.grundbuch": { l: "Grundbuch", u: "%", d: 2 },
+  "s.makler": { l: "Makler", u: "%", d: 2 },
+  "s.ausfall": { l: "Mietausfall", u: "%", d: 1 },
+  "s.mietst": { l: "Mietsteigerung", u: "% p. a.", d: 1 },
+  "s.wertst": { l: "Wertsteigerung", u: "% p. a.", d: 1 },
+  "s.zins": { l: "Sollzins", u: "%", d: 2 },
+  "s.tilg": { l: "Anfangstilgung", u: "%", d: 2 },
+  "s.bindung": { l: "Zinsbindung", u: "Jahre", d: 0 },
+  "s.verwaltung": { l: "Mietverwaltung", u: "€/Mon.", d: 0 }
+};
+function getVal(o, key) { return key.startsWith("s.") ? S.settings[key.slice(2)] : o[key]; }
+function field(o, key, opts = {}) {
+  const f = F[key];
+  const id = "f-" + key.replace(".", "-");
+  const v = getVal(o, key);
+  const label = opts.label || f.l;
+  const ph = opts.ph ?? f.ph ?? "";
+  const val = f.text ? esc(v || "") : fmtIn(v, f.d, f.grp);
+  return `<div class="fld${opts.full ? " full" : ""}">
+    <div class="lbl"><label for="${id}">${esc(label)}</label>${ib(opts.g || f.g)}</div>
+    <div class="inp"><input id="${id}" class="${f.text ? "txt" : ""}" data-k="${key}" type="text" ${f.text ? "" : 'inputmode="decimal"'} autocomplete="off" value="${val}" placeholder="${esc(ph)}">${f.u ? `<span class="u">${f.u}</span>` : ""}</div>
+    <div class="hint" data-live="hint-${key}">${opts.hint || ""}</div>
+  </div>`;
+}
+function seg(key, options, val, act = "set") {
+  return `<div class="seg" role="group">${Object.entries(options).map(([k, l]) => `<button type="button" data-act="${act}" data-k="${key}" data-v="${k}" aria-pressed="${val === k}">${esc(l)}</button>`).join("")}</div>`;
+}
+
+/* ---------- Diagramm-Bausteine ---------- */
+function waterfall(steps, opts = {}) {
+  let run = 0;
+  const rows = steps.filter(s => s && isFinite(s.v)).map(s => {
+    if (s.kind === "sub" || s.kind === "end") { run = s.v; return Object.assign({}, s, { a: 0, b: s.v }); }
+    const a = run; run += s.v; return Object.assign({}, s, { a, b: run });
+  });
+  const pts = rows.flatMap(r => [r.a, r.b]).concat([0]);
+  if (opts.ref != null && isFinite(opts.ref)) pts.push(opts.ref);
+  const lo = Math.min(...pts), hi = Math.max(...pts);
+  const span = hi - lo || 1;
+  const X = v => (v - lo) / span * 100;
+  const fmt = opts.fmt || fEurS;
+  return `<div class="wf" role="table" aria-label="${esc(opts.label || "Aufstellung")}">${rows.map(r => {
+    const x1 = X(Math.min(r.a, r.b)), x2 = X(Math.max(r.a, r.b));
+    const cls = r.cls || (r.kind === "sub" ? "sub" : r.v >= 0 ? "pos" : "neg");
+    const ref = (r.kind === "end" && opts.ref != null && isFinite(opts.ref)) ? `<i class="wf-ref" style="left:${X(opts.ref)}%" title="${esc(opts.refLabel || "")}"></i>` : "";
+    return `<div class="wf-row ${r.kind || ""}" role="row"><span class="wf-l" role="cell">${esc(r.label)}</span><span class="wf-track" aria-hidden="true"><i class="wf-zero" style="left:${X(0)}%"></i><b class="wf-bar ${cls}" style="left:${x1}%;width:${Math.max(0.5, x2 - x1)}%"></b>${ref}</span><span class="wf-v" role="cell">${fmt(r.v)}</span></div>`;
+  }).join("")}</div>`;
+}
+function bullet(ratio, zones, labels) {
+  const lo = 0.7, hi = 1.4;
+  const X = v => Math.max(0, Math.min(100, (v - lo) / (hi - lo) * 100));
+  let prev = lo;
+  const segs = zones.map(([to, cls]) => { const w = X(to) - X(prev); prev = to; return `<i class="${cls}" style="width:${w}%"></i>`; }).join("");
+  return `<div class="bullet"><div class="bullet-wrap"><div class="bullet-track">${segs}</div><span class="bullet-ref" style="left:${X(1)}%"></span><span class="bullet-mark" style="left:${X(ratio)}%"></span></div><div class="bullet-legend">${labels}</div></div>`;
+}
+function mieteBullet(o) {
+  if (!(o.vergleichQm > 0 && o.flaeche > 0 && o.miete > 0)) return `<span class="muted tiny">Vergleichsmiete eintragen, dann siehst du hier die Einordnung.</span>`;
+  const ist = o.miete / o.flaeche, ratio = ist / o.vergleichQm;
+  const s = ratio > 1.2 ? "r" : ratio > 1.1 ? "y" : ratio < 0.9 ? "b" : "g";
+  const txt = { r: "deutlich über Mietspiegel", y: "über Mietspiegel", b: "unter Mietspiegel: Potenzial", g: "im Rahmen des Mietspiegels" }[s];
+  return bullet(ratio, [[0.9, "bz-b"], [1.1, "bz-g"], [1.2, "bz-y"], [1.4, "bz-r"]],
+    `<span>Ist <b class="mono">${fNum(ist, 2)} €/m²</b> · Mietspiegel ${fNum(o.vergleichQm, 2)} €/m²</span><span class="chip ${s}">${sym(s)} ${fNum((ratio - 1) * 100, 0)} % · ${txt}</span>`);
+}
+function preisBullet(o) {
+  if (!(o.marktQm > 0 && o.flaeche > 0 && o.preis > 0)) return "";
+  const ist = o.preis / o.flaeche, ratio = ist / o.marktQm;
+  const s = ratio > 1.15 ? "r" : ratio > 1.05 ? "y" : ratio < 0.95 ? "g" : "b";
+  const txt = { r: "deutlich über Markt", y: "über Markt", g: "unter Markt", b: "marktüblich" }[s];
+  return bullet(ratio, [[0.95, "bz-g"], [1.05, "bz-b"], [1.15, "bz-y"], [1.4, "bz-r"]],
+    `<span>Ist <b class="mono">${fNum(ist, 0)} €/m²</b> · Markt ${fNum(o.marktQm, 0)} €/m²</span><span class="chip ${s}">${sym(s)} ${fNum((ratio - 1) * 100, 0)} % · ${txt}</span>`);
+}
+function niceTicks(min, max, count) {
+  const span = (max - min) || Math.abs(max) || 1;
+  const raw = span / count;
+  const mag = Math.pow(10, Math.floor(Math.log10(raw)));
+  const nrm = raw / mag;
+  const step = (nrm < 1.5 ? 1 : nrm < 3 ? 2 : nrm < 7 ? 5 : 10) * mag;
+  const lo = Math.floor(min / step) * step, hi = Math.ceil(max / step) * step;
+  const t = []; for (let v = lo; v <= hi + step / 2; v += step) t.push(Math.round(v / step) * step);
+  return t;
+}
+
+/* Vermögensdiagramm: Immobilie (realistisch, Spanne pessimistisch–optimistisch) gegen ETF */
+let PROG = null;
+function drawWealth(el) {
+  if (!PROG || !el) return;
+  const { real, pess, opt, bind } = PROG;
+  const N = 30;
+  const W = Math.max(280, Math.round(el.clientWidth));
+  const H = W < 520 ? 250 : 300;
+  const bindG = bind > 0 && bind < N;
+  const twoGuides = bindG && bind !== 10;
+  const m = { l: 56, r: 14, t: twoGuides ? 42 : 28, b: 30 };
+  const pw = W - m.l - m.r, ph = H - m.t - m.b;
+  const vals = [];
+  for (let y = 0; y <= N; y++) vals.push(real.jahre[y].vermoegen, pess.jahre[y].vermoegen, opt.jahre[y].vermoegen, real.jahre[y].etf);
+  const ticks = niceTicks(Math.min(0, ...vals), Math.max(...vals), 4);
+  const y0 = ticks[0], y1 = ticks[ticks.length - 1];
+  const X = y => m.l + y / N * pw;
+  const Yp = v => m.t + (1 - (v - y0) / (y1 - y0)) * ph;
+  const line = (arr, key) => arr.slice(0, N + 1).map((j, i) => (i ? "L" : "M") + X(i).toFixed(1) + " " + Yp(j[key]).toFixed(1)).join(" ");
+  let band = "";
+  for (let y = 0; y <= N; y++) band += (y ? "L" : "M") + X(y).toFixed(1) + " " + Yp(Math.max(opt.jahre[y].vermoegen, pess.jahre[y].vermoegen)).toFixed(1);
+  for (let y = N; y >= 0; y--) band += "L" + X(y).toFixed(1) + " " + Yp(Math.min(opt.jahre[y].vermoegen, pess.jahre[y].vermoegen)).toFixed(1);
+  band += "Z";
+  let s = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Vermögen bei Verkauf über 30 Jahre: Immobilie gegen ETF-Sparplan">`;
+  ticks.forEach(t => { s += `<line class="${t === 0 ? "base" : "gridl"}" x1="${m.l}" x2="${W - m.r}" y1="${Yp(t).toFixed(1)}" y2="${Yp(t).toFixed(1)}"></line><text x="${m.l - 8}" y="${(Yp(t) + 4).toFixed(1)}" text-anchor="end">${fT(t)}</text>`; });
+  [0, 5, 10, 15, 20, 25, 30].forEach(y => { s += `<text x="${X(y).toFixed(1)}" y="${H - 8}" text-anchor="middle">${y}</text>`; });
+  const guides = [];
+  if (bindG) guides.push([bind, bind === 10 ? "Zinsbindung · Spekulationsfrist" : "Ende Zinsbindung"]);
+  if (bind !== 10) guides.push([10, "Spekulationsfrist"]);
+  guides.forEach(([gy, gl], gi) => {
+    s += `<line class="guide" x1="${X(gy).toFixed(1)}" x2="${X(gy).toFixed(1)}" y1="${m.t - 4}" y2="${m.t + ph}"></line>`;
+    const anchor = X(gy) > W - 150 ? "end" : "start";
+    s += `<text x="${(X(gy) + (anchor === "end" ? -4 : 4)).toFixed(1)}" y="${m.t - 10 - gi * 14}" text-anchor="${anchor}" style="font-family:var(--f-body)">${esc(gl)}</text>`;
+  });
+  s += `<path class="band" d="${band}"></path>`;
+  s += `<path class="l-etf" d="${line(real.jahre, "etf")}"></path>`;
+  s += `<path class="l-immo" d="${line(real.jahre, "vermoegen")}"></path>`;
+  [10, 20, 30].forEach(y => {
+    s += `<circle class="m-etf" cx="${X(y).toFixed(1)}" cy="${Yp(real.jahre[y].etf).toFixed(1)}" r="4.5"></circle>`;
+    s += `<circle class="m-immo" cx="${X(y).toFixed(1)}" cy="${Yp(real.jahre[y].vermoegen).toFixed(1)}" r="4.5"></circle>`;
+  });
+  /* Endbeschriftung, Kollisionen vermeiden */
+  let yi = Yp(real.jahre[N].vermoegen), ye = Yp(real.jahre[N].etf);
+  if (Math.abs(yi - ye) < 30) { const mid = (yi + ye) / 2; if (yi <= ye) { yi = mid - 15; ye = mid + 15; } else { yi = mid + 15; ye = mid - 15; } }
+  const lx = X(N) - 8;
+  s += `<text class="lab" x="${lx}" y="${(yi - 8).toFixed(1)}" text-anchor="end">Immobilie ${fT(real.jahre[N].vermoegen)}</text>`;
+  s += `<text class="lab" x="${lx}" y="${(ye + (ye > yi ? 18 : -8)).toFixed(1)}" text-anchor="end">ETF ${fT(real.jahre[N].etf)}</text>`;
+  s += `<line class="cross" id="w-cross" x1="0" x2="0" y1="${m.t}" y2="${m.t + ph}" style="display:none"></line>`;
+  s += `<rect id="w-hit" x="${m.l}" y="${m.t}" width="${pw}" height="${ph}" fill="transparent"></rect></svg><div class="tip" id="w-tip" hidden></div>`;
+  el.innerHTML = s;
+  const hit = el.querySelector("#w-hit"), cross = el.querySelector("#w-cross"), tip = el.querySelector("#w-tip");
+  const show = ev => {
+    const rect = el.getBoundingClientRect();
+    const px = ev.clientX - rect.left;
+    const y = Math.max(0, Math.min(N, Math.round((px - m.l) / pw * N)));
+    const r = real.jahre[y], p = pess.jahre[y], o = opt.jahre[y];
+    cross.setAttribute("x1", X(y)); cross.setAttribute("x2", X(y)); cross.style.display = "";
+    const diff = r.vermoegen - r.etf;
+    tip.innerHTML = `<div class="tr"><span>Jahr ${y}</span></div>
+      <div class="tr"><span>Immobilie</span><b>${fT(r.vermoegen)}</b></div>
+      <div class="tr"><span>Spanne</span><b>${fT(Math.min(p.vermoegen, o.vermoegen))} – ${fT(Math.max(p.vermoegen, o.vermoegen))}</b></div>
+      <div class="tr"><span>ETF</span><b>${fT(r.etf)}</b></div>
+      <div class="tr"><span>Vorsprung</span><b>${(diff > 0 ? "+" : "") + fT(diff)}</b></div>
+      <div class="tr"><span>Eingesetzt</span><b>${fT(r.eingesetzt)}</b></div>`;
+    tip.hidden = false;
+    const tw = tip.offsetWidth;
+    let left = X(y) + 12; if (left + tw > W) left = X(y) - tw - 12;
+    tip.style.left = Math.max(0, left) + "px"; tip.style.top = (m.t + 4) + "px";
+  };
+  hit.addEventListener("pointermove", show);
+  hit.addEventListener("pointerdown", show);
+  hit.addEventListener("pointerleave", () => { tip.hidden = true; cross.style.display = "none"; });
+}
+function drawCharts() { document.querySelectorAll("[data-chart='wealth']").forEach(drawWealth); }
+
+/* ---------- Ansichten ---------- */
+function verdictChip(b) {
+  if (!b || !b.verdict) return `<span class="chip">${sym("b")} unvollständig</span>`;
+  return `<span class="chip ${b.verdict}">${sym(b.verdict)} ${VERDICT[b.verdict]}</span>`;
+}
+function viewList() {
+  const objs = S.objects.slice().sort((a, b) => STATUS_ORDER.indexOf(a.status) - STATUS_ORDER.indexOf(b.status) || (b.updatedAt || 0) - (a.updatedAt || 0));
+  const card = o => {
+    const { c, b } = evaluate(o);
+    const ok = b.verdict;
+    const cf = c.cfnMon;
+    return `<button class="objcard ${o.status === "abgelehnt" ? "dim" : ""}" data-act="open" data-id="${o.id}">
+      <span class="oc-top"><span class="t"><span class="ak">${esc(o.ak || "")} · ${esc(STATUS[o.status] || "")}</span><b>${esc(o.name || "Ohne Namen")}</b><span>${esc(o.adresse || ART[o.art])}</span></span>${verdictChip(b)}</span>
+      <span class="oc-nums">
+        <span class="n"><span>Kaufpreis</span><b>${o.preis ? fEur(o.preis) : "–"}</b></span>
+        <span class="n"><span>Cashflow n. St.</span><b>${ok ? fEurS(cf) : "–"}</b></span>
+        <span class="n"><span>Faktor</span><b>${ok ? fNum(c.faktor, 1) : "–"}</b></span>
+      </span>
+    </button>`;
+  };
+  return `<section class="view">
+    <div class="card-head"><h2>Objekte</h2><button class="btn primary" data-act="new">+ Neues Objekt</button></div>
+    ${objs.length ? objs.map(card).join("") : `<div class="empty">
+      <span class="eyebrow">Noch keine Objekte</span>
+      <h3>Lege dein erstes Objekt an</h3>
+      <p class="muted">Trag Kaufpreis, Miete, Fläche und Baujahr ein. Die Objektakte rechnet Nebenkosten, Finanzierung, Steuern und Rendite und gibt dir ein Ampel-Urteil. Unten siehst du ein durchgerechnetes Beispiel.</p>
+      <button class="btn primary" data-act="new">Erstes Objekt anlegen</button>
+    </div>`}
+    <div class="stack">
+      <span class="eyebrow">Beispiel zum Ausprobieren</span>
+      ${card(SAMPLE)}
+    </div>
+  </section>`;
+}
+
+function liveStrip(o) {
+  const { c, b } = evaluate(o);
+  if (!b.verdict) return `<div class="livestrip"><span>Es fehlt: <b>${esc(b.fehlt.join(", "))}</b></span></div>`;
+  return `<div class="livestrip"><span>Cashflow n. St. <b>${fEurS(c.cfnMon)}</b>/Mon.</span><span>Faktor <b>${fNum(c.faktor, 1)}</b></span><span>EK-Rendite <b>${c.irrImmo == null ? "–" : fPct(c.irrImmo * 100)}</b></span><span>Urteil <b>${VERDICT[b.verdict]}</b></span></div>`;
+}
+
+function renderTop() {
+  const top = $("#top");
+  if (V.obj) {
+    const o = getObj(V.obj);
+    if (!o) { V.obj = null; return renderTop(); }
+    const { b } = evaluate(o);
+    const SUB = [["urteil", "Urteil"], ["daten", "Daten"], ["finanzierung", "Finanzen"], ["prognose", "Prognose"], ["check", "Check"]];
+    top.innerHTML = `<div class="top-row"><button class="back" data-act="back" aria-label="Zurück zur Objektliste">‹ Objekte</button><div class="obj-title"><b>${esc(o.name || "Ohne Namen")}</b><span>${esc(o.ak || "")}</span></div><span data-live="topchip">${verdictChip(b)}</span></div>
+      <nav class="subnav" aria-label="Akte">${SUB.map(([k, l]) => `<button data-act="sub" data-v="${k}" ${V.sub === k ? 'aria-current="page"' : ""}>${l}</button>`).join("")}</nav>
+      ${["daten", "finanzierung", "check"].includes(V.sub) ? `<div data-live="strip">${liveStrip(o)}</div>` : ""}`;
+  } else {
+    top.innerHTML = `<div class="top-row"><div class="brand"><h1>Objektakte</h1><span class="dtg" id="dtg">DTG ${dtg(new Date())}</span></div><span class="sync ${syncOn ? "on" : ""}" id="sync"><i></i><span>${syncOn ? "Synchron" : "Nur dieses Gerät"}</span></span></div>`;
+  }
+}
+
+function sampleBanner(o) {
+  if (!isSample(o)) return "";
+  return `<div class="note b">${sym("b")}<span><b>Beispielobjekt, fiktiv.</b> Spiel mit den Zahlen. Änderungen werden nicht gespeichert. <button class="btn link" data-act="adopt">Als eigenes Objekt übernehmen</button></span></div>`;
+}
+
+function viewUrteil(o) {
+  const { c, b } = evaluate(o);
+  if (!b.verdict) {
+    return `<section class="view">${sampleBanner(o)}<div class="verdict n"><span class="eyebrow">Urteil</span><div class="v-word">Daten fehlen</div><p class="v-lead">Für ein Urteil fehlen noch: ${esc(b.fehlt.join(", "))}.</p><div><button class="btn primary" data-act="sub" data-v="daten">Daten eintragen</button></div></div></section>`;
+  }
+  const A = S.settings;
+  const P = b.P;
+  const etf = c.irrEtf;
+  const pTxt = {
+    preis: { g: `Faktor ${fNum(c.faktor, 1)}: Preis passt zur Miete.`, y: `Faktor ${fNum(c.faktor, 1)}: eher teuer. Faktor 20 wären ${fEur(20 * c.jm0 - c.sp)}.`, r: `Faktor ${fNum(c.faktor, 1)}: zu teuer für eine Vermietung. Faktor 25 wären ${fEur(25 * c.jm0 - c.sp)}.` }[P.preis],
+    liq: { g: `Trägt sich selbst: ${fEurS(c.cfnMon)} im Monat nach Steuern.`, y: `Du zahlst ${fEur(-c.cfnMon)} im Monat zu, im Rahmen deines Puffers von ${fEur(A.puffer)}.`, r: `Du zahlst ${fEur(-c.cfnMon)} im Monat zu, mehr als dein Puffer von ${fEur(A.puffer)}.` }[P.liq],
+    rendite: c.irrImmo == null ? (P.rendite === "g" ? "Ohne Eigenkapital und ohne Zuzahlung: Rendite nicht begrenzt." : "Am Ende bleibt weniger übrig, als du eingesetzt hast.") : c.irrEtf == null ? `${fPct(c.irrImmo * 100)} p. a. auf dein Eigenkapital.` :
+      { g: `${fPct(c.irrImmo * 100)} p. a. auf dein Eigenkapital, besser als der ETF (${fPct(etf * 100)}).`, y: `${fPct(c.irrImmo * 100)} p. a., knapp unter dem ETF (${fPct(etf * 100)}).`, r: `${fPct(c.irrImmo * 100)} p. a., deutlich unter dem ETF (${fPct(etf * 100)}).` }[P.rendite],
+    risiko: b.flags.length ? esc(b.flags[0].t) + (b.flags.length > 1 ? ` (+${b.flags.length - 1} weitere)` : "") : "Keine erhöhten Risiken erkannt."
+  };
+  const pill = (k, label) => `<li>${sym(P[k])}<b>${label}</b><span class="t">${pTxt[k]}</span></li>`;
+
+  /* Höchstpreis */
+  const tr = R.hoechstpreis(p => R.calc(Object.assign({}, o, { preis: p }), A).cfnMon >= A.zielCf, o.preis);
+  const kf = R.hoechstpreis(p => { const o2 = Object.assign({}, o, { preis: p }); const c2 = R.calc(o2, A); return R.bewerten(o2, A, c2).verdict === "g"; }, o.preis);
+  const PNAME = { preis: "Preis", liq: "Liquidität", rendite: "Rendite", risiko: "Risiko" };
+  let flip = "";
+  if (!kf.none && !kf.above) {
+    const pAt = p => { const o2 = Object.assign({}, o, { preis: p }); return R.bewerten(o2, A, R.calc(o2, A)).P; };
+    const a = pAt(kf.p), z = pAt(kf.p + 1000);
+    const ch = Object.keys(a).filter(k => a[k] === "g" && z[k] !== "g").map(k => PNAME[k]);
+    if (ch.length) flip = "darüber wird " + ch.join(" und ") + " gelb";
+  }
+  const f20 = { p: Math.max(0, Math.floor((20 * c.jm0 - c.sp) / 500) * 500) };
+  const maxRow = (title, res, noneText, extra) => {
+    if (res.none) return `<div class="maxrow"><span>${title}</span><span class="v">–</span><span class="sub">${noneText}</span></div>`;
+    const d = res.p - o.preis, pct = d / o.preis * 100;
+    const s = d >= 0 ? "g" : pct >= -10 ? "y" : "r";
+    return `<div class="maxrow"><span>${title}</span><span class="v">${res.above ? "über " : ""}${fEur(res.p)}</span><span class="sub"><span class="chip ${s}">${sym(s)} ${d >= 0 ? "Preis passt" : fPct(pct, 0)}</span> ${d >= 0 ? "Spielraum: " + fEur(d) : "Verhandlungsziel: " + fEur(-d) + " weniger"}${extra ? ", " + extra : ""}</span></div>`;
+  };
+
+  const tiles = [
+    ["faktor", "Kaufpreisfaktor", fNum(c.faktor, 1), P.preis, "Grün bis 20 · Rot über 25"],
+    ["brutto", "Bruttomietrendite", fPct(c.brutto), P.preis, "Grün ab 5 % · Rot unter 4 %"],
+    ["netto", "Nettomietrendite", fPct(c.netto), c.netto >= c.effZins ? "g" : c.netto >= c.effZins - 1 ? "y" : "r", `Grün über Kreditzins (${fPct(c.effZins, 2)})`],
+    ["dscr", "Kapitaldienstdeckung", c.dscr == null ? "–" : fNum(c.dscr, 2), c.dscr == null ? "g" : c.dscr >= 1.2 ? "g" : c.dscr >= 1 ? "y" : "r", "Grün ab 1,2 · Rot unter 1,0"],
+    ["cashflow", "Cashflow vor Steuern", fEurS(c.cfvMon), c.cfvMon >= 0 ? "g" : c.cfvMon >= -A.puffer ? "y" : "r", "pro Monat, erstes Jahr"],
+    ["cashflow", "Cashflow nach Steuern", fEurS(c.cfnMon), P.liq, `Puffer: ${fEur(A.puffer)}/Monat`],
+    ["irr", "Eigenkapitalrendite", c.irrImmo == null ? "–" : fPct(c.irrImmo * 100), P.rendite, `${c.H} Jahre inkl. Verkauf · ETF ${fPct(etf * 100)}`],
+    ["gesamt", "Gesamtinvestition", fEur(c.gesamt), "b", `davon Nebenkosten ${fEur(c.nk)}`]
+  ];
+
+  const j1 = c.jahre[1];
+  const cfSteps = [
+    { label: "Kaltmiete", v: j1.jm / 12, cls: "pos" },
+    { label: "Mietausfall", v: -j1.ausfall / 12 },
+    { label: o.art === "etw" ? "Hausgeld, nicht umlagefähig" : "Nicht umlagefähige Kosten", v: -j1.kostenHG / 12 },
+    { label: "Mietverwaltung", v: -j1.kostenVw / 12 },
+    { label: "Instandhaltung", v: -j1.kostenIh / 12 },
+    { label: "Reinertrag", v: j1.noi / 12, kind: "sub" },
+    { label: "Zinsen", v: -j1.zinsen / 12 },
+    { label: "Tilgung", v: -j1.tilg / 12 },
+    { label: "Cashflow vor Steuern", v: j1.cfv / 12, kind: "sub" },
+    { label: j1.stLfd <= 0 ? "Steuererstattung" : "Steuer", v: -j1.stLfd / 12, cls: j1.stLfd <= 0 ? "pos" : "" },
+    { label: "Cashflow nach Steuern", v: j1.cfnLfd / 12, kind: "end", cls: P.liq }
+  ];
+
+  const st = b.stress;
+  const H = hints(o, c, b);
+  const allNotes = b.flags.map(f => ({ s: f.s, t: f.t })).concat(H);
+
+  return `<section class="view">
+    ${sampleBanner(o)}
+    <div class="verdict ${b.verdict}">
+      <div class="card-head"><span class="eyebrow">Urteil ${ib("urteil")}</span><span class="ak">${esc(o.ak || "")}</span></div>
+      <div class="v-word">${VERDICT[b.verdict]}</div>
+      <p class="v-lead">${VERDICT_LEAD[b.verdict]}</p>
+      <ul class="pillars">${pill("preis", "Preis")}${pill("liq", "Liquidität")}${pill("rendite", "Rendite")}${pill("risiko", "Risiko")}</ul>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h3>Höchstpreis ${ib("hoechstpreis")}</h3><span class="muted small">Angebot: ${fEur(o.preis)}</span></div>
+      <div>
+        ${maxRow("Für Faktor 20 (fairer Preis)", f20, "")}
+        ${maxRow(`Damit es sich selbst trägt (Cashflow ab ${fEur(A.zielCf)})`, tr, "Auch bei sehr niedrigem Preis nicht erreichbar. Prüfe Kosten und Finanzierung.")}
+        ${maxRow("Für das Urteil Kaufen", kf, "Nicht über den Preis lösbar: Ein Risiko-Punkt bleibt rot. Siehe Hinweise.", flip)}
+      </div>
+      <p class="muted tiny">Eigenkapital und Finanzierung bleiben gleich, die Nebenkosten passen sich dem Preis an.</p>
+    </div>
+
+    <div class="tiles">${tiles.map(([g, l, v, s, thr]) => `<div class="tile"><div class="lbl"><span>${l}</span>${ib(g)}</div><div class="val ${s === "b" ? "" : s}">${v}</div><div class="thr">${sym(s)} ${thr}</div></div>`).join("")}</div>
+
+    <div class="card">
+      <div class="card-head"><h3>Monatsrechnung im ersten Jahr</h3>${ib("cashflow")}</div>
+      ${waterfall(cfSteps, { label: "Monatlicher Cashflow" })}
+      ${c.sofortEffekt > 0 ? `<p class="muted tiny">Einmalig im ersten Jahr zusätzlich: rund ${fEur(c.sofortEffekt)} Steuerersparnis durch die sofort absetzbare Sanierung.</p>` : ""}
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h3>Warnungen und Hinweise</h3><span class="muted small">${b.flags.length === 0 ? "keine Warnung" : b.flags.length === 1 ? "1 Warnung" : b.flags.length + " Warnungen"}</span></div>
+      ${allNotes.length ? `<ul class="notes">${allNotes.map(n => `<li>${sym(n.s)}<span class="t">${esc(n.t)}</span></li>`).join("")}</ul>` : `<p class="muted">Keine Auffälligkeiten.</p>`}
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h3>Stresstest Anschlusszins</h3>${ib("stresstest")}</div>
+      ${stressTable(st, b.puffer)}
+    </div>
+  </section>`;
+}
+function stressTable(st, puffer) {
+  if (st[0].none) return `<p class="muted">${esc(st[0].none)}.</p>`;
+  return `<div class="tscroll"><table class="data"><thead><tr><th>Zins danach</th><th>Rate/Monat</th><th>Cashflow n. St.</th></tr></thead><tbody>
+    ${st.map(r => {
+      const s = r.cfnNach >= 0 ? "g" : r.cfnNach >= -puffer ? "y" : "r";
+      return `<tr><td>${fPct(r.az, 2)} <span class="muted tiny">${r.d === 0 ? "Annahme" : "+" + r.d + " Punkte"}</span></td><td>${fEur(r.rateNach)}<br><span class="muted tiny">${fEurS(r.rateNach - r.rateVor)}</span></td><td><span class="chip ${s}">${sym(s)} ${fEurS(r.cfnNach)}</span></td></tr>`;
+    }).join("")}
+  </tbody></table></div><p class="muted tiny">Werte für Jahr ${st[0].jahr}, das erste Jahr nach der Zinsbindung. Die Rate tilgt den Rest bis zum ursprünglich geplanten Ende.</p>`;
+}
+
+function nkTable(o, c) {
+  return `<table class="sumtable"><tbody>
+    <tr><td>Grunderwerbsteuer <span class="muted">${fPct(c.grestSatz, 1)}</span></td><td class="n">${fEur(c.grest)}</td></tr>
+    <tr><td>Notar <span class="muted">${fPct(o.notar, 2)}</span></td><td class="n">${fEur(c.notar)}</td></tr>
+    <tr><td>Grundbuch <span class="muted">${fPct(o.grundbuch, 2)}</span></td><td class="n">${fEur(c.grundbuch)}</td></tr>
+    <tr><td>Makler <span class="muted">${fPct(o.makler, 2)}</span></td><td class="n">${fEur(c.makler)}</td></tr>
+    ${c.gutachter ? `<tr><td>Gutachter</td><td class="n">${fEur(c.gutachter)}</td></tr>` : ""}
+    <tr><td><b>Kaufnebenkosten</b> <span class="muted">${fPct(c.kauf > 0 ? c.nk / c.kauf * 100 : 0, 1)} vom Kaufpreis</span></td><td class="n"><b>${fEur(c.nk)}</b></td></tr>
+    <tr><td>Kaufpreis, Stellplatz, Inventar</td><td class="n">${fEur(c.kauf)}</td></tr>
+    <tr><td>Sanierungsstau aus dem Check ${c.san ? "" : `<span class="muted">(${c.sanStau ? "nicht eingerechnet" : "keiner erfasst"})</span>`}</td><td class="n">${fEur(c.san)}</td></tr>
+    <tr class="total"><td>Gesamtinvestition ${ib("gesamt")}</td><td class="n">${fEur(c.gesamt)}</td></tr>
+  </tbody></table>`;
+}
+function afaLine(c) {
+  return `Bodenanteil ${fPct(c.bodenAnteil * 100, 0)} · AfA-Basis ${fEur(c.afaBasis)} · ${fPct(c.afaSatz, 1)} = <b>${fEur(c.afaGeb)}</b> pro Jahr${c.afaInv > 0 ? ` · Inventar ${fEur(c.afaInv)} pro Jahr` : ""}`;
+}
+function noiTable(o, c) {
+  const j1 = c.jahre[1];
+  return `<table class="sumtable"><tbody>
+    <tr><td>Jahreskaltmiete</td><td class="n">${fEur(j1.jm)}</td></tr>
+    <tr><td>Mietausfall</td><td class="n">${fEur(-j1.ausfall)}</td></tr>
+    <tr><td>Laufende Kosten <span class="muted">Hausgeld, Verwaltung, Instandhaltung</span></td><td class="n">${fEur(-j1.kosten)}</td></tr>
+    <tr class="total"><td>Jahresreinertrag</td><td class="n">${fEur(j1.noi)}</td></tr>
+  </tbody></table>`;
+}
+
+function viewDaten(o) {
+  const { c } = evaluate(o);
+  const autoGrest = R.GREST[o.land] ?? 5;
+  const rw = R.instandRichtwert(o);
+  return `<section class="view">
+    ${sampleBanner(o)}
+    <div class="card">
+      <h3>Objekt</h3>
+      <div class="fgrid">
+        ${field(o, "name", { full: true })}
+        ${field(o, "adresse", { full: true })}
+        <div class="fld full"><div class="lbl"><span>Objektart</span></div>${seg("art", ART, o.art)}</div>
+        <div class="fld"><div class="lbl"><label for="f-land">Bundesland</label>${ib("grest")}</div><select id="f-land" data-k="land">${Object.entries(R.LAENDER).map(([k, l]) => `<option value="${k}" ${o.land === k ? "selected" : ""}>${l} · ${fNum(R.GREST[k], 1)} %</option>`).join("")}</select></div>
+        <div class="fld"><div class="lbl"><label for="f-energie">Energieklasse</label>${ib("energie")}</div><select id="f-energie" data-k="energie">${ENERGIE.map(e => `<option value="${e}" ${o.energie === e ? "selected" : ""}>${e === "?" ? "unbekannt" : e}</option>`).join("")}</select></div>
+        ${field(o, "baujahr")}
+        ${field(o, "flaeche")}
+        ${field(o, "zimmer")}
+        ${o.art === "mfh" ? field(o, "einheiten") : field(o, "marktQm", { hint: "Gutachterausschuss oder Portale" })}
+        ${o.art === "mfh" ? field(o, "marktQm", { hint: "Gutachterausschuss oder Portale", full: true }) : ""}
+        <div class="fld full"><div class="lbl"><span>Zustand</span></div>${seg("zustand", ZUSTAND, o.zustand)}</div>
+      </div>
+      <div data-live="preisbullet">${preisBullet(o)}</div>
+    </div>
+
+    <div class="card">
+      <h3>Kaufpreis und Boden</h3>
+      <div class="fgrid">
+        ${field(o, "preis", { full: true })}
+        ${field(o, "stellplatz")}
+        ${field(o, "inventar")}
+        ${field(o, "bodenProz", { hint: "Wohnung oft 15–25 %, Haus 25–40 %" })}
+        ${field(o, "bodenrichtwert", { hint: '<a href="https://www.bodenrichtwerte-boris.de" target="_blank" rel="noopener">BORIS: Bodenrichtwerte</a>' })}
+        ${field(o, "grundstueck", { hint: "Ersetzt den Prozentwert, wenn beides gefüllt" })}
+      </div>
+      <p class="small muted" data-live="afa">${afaLine(c)}</p>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h3>Kaufnebenkosten</h3>${ib("nk")}</div>
+      <div class="fgrid">
+        ${field(o, "grest", { ph: fmtIn(autoGrest, 2) + " (" + (R.LAENDER[o.land] || "") + ")", hint: "Leer = Satz des Bundeslands" })}
+        ${field(o, "makler", { hint: "Käuferanteil, meist 3,57 %" })}
+        ${field(o, "notar")}
+        ${field(o, "grundbuch")}
+        ${field(o, "gutachter", { hint: "optional, z. B. Bausachverständiger" })}
+      </div>
+      <label class="switch"><input type="checkbox" id="f-sanEin" data-k="sanEin" ${o.sanEin !== false ? "checked" : ""}><span>Sanierungsstau aus dem Check einrechnen (${fEur(c.sanStau)})</span></label>
+      <div data-live="nk">${nkTable(o, c)}</div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h3>Miete und laufende Kosten</h3>${ib("cashflow")}</div>
+      <div class="fgrid">
+        ${field(o, "miete", { hint: o.miete && o.flaeche ? `= ${fNum(o.miete / o.flaeche, 2)} €/m²` : "" })}
+        ${field(o, "vergleichQm")}
+        <div class="full" data-live="mietebullet">${mieteBullet(o)}</div>
+        ${field(o, "mietst")}
+        ${field(o, "wertst")}
+        ${field(o, "hausgeld", { label: o.art === "etw" ? "Hausgeld, nicht umlagefähig" : "Nicht umlagefähige Kosten", hint: o.art === "etw" ? "Aus der Jahresabrechnung" : "z. B. Kontoführung" })}
+        ${field(o, "verwaltung", { hint: o.art === "mfh" ? "für alle Einheiten zusammen" : "" })}
+        ${field(o, "instand", { ph: fmtIn(rw, 2) + " Richtwert", hint: `Leer = Richtwert ${fNum(rw, 2)} €/m²${o.art === "etw" ? " (Sondereigentum)" : ""}` })}
+        ${field(o, "ausfall")}
+      </div>
+      <div data-live="noi">${noiTable(o, c)}</div>
+    </div>
+  </section>`;
+}
+
+function finSummary(o, c) {
+  const restPct = c.L1 > 0 && c.d1.restBind != null ? c.d1.restBind / c.L1 * 100 : 0;
+  const rs = restPct > 75 ? "y" : "g";
+  const dk = c.preis > 0 ? c.bedarf / c.immo * 100 : 0;
+  return `<div class="tiles">
+    <div class="tile"><div class="lbl"><span>Darlehen gesamt</span>${ib("ek")}</div><div class="val">${fEur(c.bedarf)}</div><div class="thr">${sym(dk > 100 ? "y" : "b")} ${fPct(dk, 0)} vom Kaufpreis</div></div>
+    <div class="tile"><div class="lbl"><span>Monatsrate</span>${ib("annuitaet")}</div><div class="val">${fEur(c.rateMon)}</div><div class="thr">${sym("b")} Zins und Tilgung</div></div>
+    <div class="tile"><div class="lbl"><span>Restschuld nach ${Math.round(o.bindung)} J.</span>${ib("restschuld")}</div><div class="val ${rs}">${c.L1 > 0 && c.d1.restBind != null ? fEur(c.d1.restBind) : "–"}</div><div class="thr">${sym(rs)} ${fPct(restPct, 0)} des Hauptdarlehens</div></div>
+    <div class="tile"><div class="lbl"><span>Schuldenfrei</span></div><div class="val">${c.payoff === null ? "nie" : c.payoff ? "Jahr " + c.payoff : "–"}</div><div class="thr">${sym("b")} Zinsen gesamt ${fEur(c.zinsGesamt)}</div></div>
+  </div>`;
+}
+function tilgPlan(o, c) {
+  if (!(c.bedarf > 0)) return `<p class="muted">Kein Darlehen: Das Eigenkapital deckt die Gesamtinvestition.</p>`;
+  const last = c.payoff || 50;
+  const rows = [];
+  for (let y = 1; y <= Math.min(50, last); y++) {
+    const j = c.jahre[y];
+    rows.push(`<tr class="${y === Math.round(o.bindung) ? "mark" : ""}"><td>${y}${y === Math.round(o.bindung) ? " · Ende Bindung" : ""}</td><td>${fEur(j.rate)}</td><td>${fEur(j.zinsen)}</td><td>${fEur(j.tilg)}</td><td>${fEur(j.sonder)}</td><td>${fEur(j.rest)}</td></tr>`);
+  }
+  return `<div class="tscroll tall"><table class="data"><thead><tr><th>Jahr</th><th>Rate</th><th>Zinsen</th><th>Tilgung</th><th>Sondertilg.</th><th>Restschuld</th></tr></thead><tbody>${rows.join("")}</tbody></table></div>`;
+}
+function viewFinanzierung(o) {
+  const { c, b } = evaluate(o);
+  return `<section class="view">
+    ${sampleBanner(o)}
+    <div class="card">
+      <div class="card-head"><h3>Eigenkapital</h3>${ib("ek")}</div>
+      <div class="fgrid">${field(o, "ek", { full: true })}</div>
+      <p class="small" data-live="ekline">${ekLine(c)}</p>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>Hauptdarlehen</h3><span class="muted small" data-live="l1">${fEur(c.L1)}</span></div>
+      <div class="fgrid">
+        ${field(o, "zins", { hint: "Oktober 2026: rund 4 % bei 10 Jahren" })}
+        ${field(o, "tilg")}
+        ${field(o, "bindung")}
+        ${field(o, "sonder")}
+        ${field(o, "anschluss", { ph: fmtIn(o.zins, 2) + " wie heute", hint: "Leer = gleicher Zins wie heute", full: true })}
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>Zweites Darlehen</h3>${ib("kfw")}</div>
+      <label class="switch"><input type="checkbox" id="f-kfwOn" data-k="kfwOn" ${o.kfwOn ? "checked" : ""}><span>KfW- oder zweites Darlehen nutzen</span></label>
+      ${o.kfwOn ? `<div class="fgrid">${field(o, "kfwBetrag")}${field(o, "kfwZins")}${field(o, "kfwTilg")}${field(o, "kfwBindung")}</div>` : ""}
+    </div>
+    <div data-live="finsum">${finSummary(o, c)}</div>
+    <div class="card">
+      <div class="card-head"><h3>Stresstest Anschlusszins</h3>${ib("stresstest")}</div>
+      <div data-live="stress">${b.verdict ? stressTable(b.stress, b.puffer) : `<p class="muted">Erst Daten vervollständigen.</p>`}</div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>Tilgungsplan</h3>${downloads ? `<button class="btn sm" data-act="csv">Als CSV speichern</button>` : ""}</div>
+      <div data-live="tilg">${tilgPlan(o, c)}</div>
+    </div>
+  </section>`;
+}
+function ekLine(c) {
+  const ok = c.ekEff >= c.nk;
+  return `${sym(ok ? "g" : "y")} ${fPct(c.gesamt > 0 ? c.ekEff / c.gesamt * 100 : 0, 0)} der Gesamtinvestition. ${ok ? "Deckt die Kaufnebenkosten (" + fEur(c.nk) + ")." : "Deckt die Kaufnebenkosten (" + fEur(c.nk) + ") nicht."}`;
+}
+
+function viewPrognose(o) {
+  const { c, b } = evaluate(o);
+  if (!b.verdict) return `<section class="view">${sampleBanner(o)}<div class="empty"><h3>Für die Prognose fehlen Daten</h3><p class="muted">${esc(b.fehlt.join(", "))}</p><button class="btn primary" data-act="sub" data-v="daten">Daten eintragen</button></div></section>`;
+  const A = S.settings;
+  const pess = R.calc(o, A, R.SZEN.pess), opt = R.calc(o, A, R.SZEN.opt);
+  PROG = { real: c, pess, opt, bind: Math.round(o.bindung) };
+  const hz = [10, 20, 30];
+  const t = V.horizon;
+  const j = c.jahre[t];
+  const gain = j.vermoegen - j.eingesetzt, etfGain = j.etf - j.eingesetzt;
+  const gs = gain >= etfGain ? "g" : gain >= 0 ? "y" : "r";
+  const steps = [
+    { label: "Tilgung", v: j.tilgKum },
+    { label: "Deine Zuzahlungen", v: -j.zuz },
+    { label: "Wertsteigerung", v: j.ws },
+    { label: "Angesparte Überschüsse", v: j.side },
+    { label: "Kaufnebenkosten, Sanierung, Inventar", v: -(c.nk + c.san + c.inv) },
+    { label: "Verkaufskosten und Steuer", v: -(j.vk + j.speku) },
+    { label: `Gewinn nach ${t} Jahren`, v: gain, kind: "end", cls: gs }
+  ].filter(s => Math.abs(s.v) >= 1 || s.kind === "end");
+  const row = (label, f) => `<tr><td>${label}</td>${hz.map(y => `<td>${f(y)}</td>`).join("")}</tr>`;
+  return `<section class="view">
+    ${sampleBanner(o)}
+    <div class="card">
+      <div class="card-head"><h3>Vermögen bei Verkauf</h3>${ib("szenarien")}</div>
+      <div class="legend"><span><i class="lg-immo"></i>Immobilie, realistisch</span><span><i class="lg-band"></i>Spanne pessimistisch bis optimistisch</span><span><i class="lg-etf"></i>ETF-Sparplan</span></div>
+      <div class="chart" data-chart="wealth"></div>
+      <p class="muted tiny">Nach Verkaufskosten, Restschuld und Steuern. Der ETF bekommt dasselbe Geld: dein Eigenkapital und jede Zuzahlung. Antippen zeigt die Werte je Jahr.</p>
+    </div>
+    <div class="card">
+      <h3>Jahr 10, 20 und 30</h3>
+      <div class="tscroll"><table class="data"><thead><tr><th>Vermögen</th><th>10 J.</th><th>20 J.</th><th>30 J.</th></tr></thead><tbody>
+        ${row("Pessimistisch", y => fEur(pess.jahre[y].vermoegen))}
+        ${row("Realistisch", y => `<b>${fEur(c.jahre[y].vermoegen)}</b>`)}
+        ${row("Optimistisch", y => fEur(opt.jahre[y].vermoegen))}
+        ${row("ETF-Sparplan", y => fEur(c.jahre[y].etf))}
+        ${row("Eingesetzt", y => fEur(c.jahre[y].eingesetzt))}
+        ${row("Restschuld", y => fEur(c.jahre[y].rest))}
+        ${row("Immobilienwert", y => fEur(c.jahre[y].wert))}
+      </tbody></table></div>
+      <div class="tscroll"><table class="data"><thead><tr><th>Rendite p. a. (${c.H} J.)</th><th>Pess.</th><th>Real.</th><th>Opt.</th><th>ETF</th></tr></thead><tbody>
+        <tr><td>Eigenkapitalrendite</td><td>${pess.irrImmo == null ? "–" : fPct(pess.irrImmo * 100)}</td><td><b>${c.irrImmo == null ? "–" : fPct(c.irrImmo * 100)}</b></td><td>${opt.irrImmo == null ? "–" : fPct(opt.irrImmo * 100)}</td><td>${c.irrEtf == null ? "–" : fPct(c.irrEtf * 100)}</td></tr>
+      </tbody></table></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>Woraus entsteht dein Gewinn?</h3>${seg("horizon", { 10: "10 J.", 20: "20 J.", 30: "30 J." }, String(t), "horizon")}</div>
+      ${waterfall(steps, { label: "Gewinnzerlegung", ref: etfGain, refLabel: "ETF-Gewinn" })}
+      <p class="small"><span class="chip ${gs}">${sym(gs)} ${gain >= etfGain ? "besser als der ETF" : gain >= 0 ? "Gewinn, aber unter dem ETF" : "Verlust"}</span> ETF-Gewinn im Vergleich: <b class="mono">${fEurS(etfGain)}</b> <span class="muted">(violette Linie)</span>. Eingesetzt: ${fEur(j.eingesetzt)}.</p>
+    </div>
+    <div class="note ${A.halte < 10 ? "y" : "b"}">${sym(A.halte < 10 ? "y" : "b")}<span><b>Spekulationsfrist:</b> Verkaufst du vor Ablauf von 10 Jahren, versteuerst du den Gewinn mit deinem Grenzsteuersatz. Die Prognose berücksichtigt das. ${ib("speku")}</span></div>
+  </section>`;
+}
+
+function viewCheck(o) {
+  const groups = checkGroups(o);
+  const { c } = evaluate(o);
+  const group = g => {
+    const def = CHECK[g];
+    const items = def.items;
+    let ok = 0, m = 0, k = 0, cnt = 0;
+    items.forEach(([id]) => { if (id === "sonst") return; cnt++; const s = o.checks[id]; if (s === "ok") ok++; else if (s === "mangel") m++; else if (s === "krit") k++; });
+    return `<div class="card">
+      <div class="card-head"><h3>${def.t}</h3><span class="muted small">${ok + m + k}/${cnt} geprüft</span></div>
+      <div class="progress" aria-hidden="true"><i class="p-ok" style="width:${ok / cnt * 100}%"></i><i class="p-m" style="width:${m / cnt * 100}%"></i><i class="p-k" style="width:${k / cnt * 100}%"></i></div>
+      <div>${items.map(([id, t, d]) => {
+        const s = o.checks[id] || "";
+        const costVisible = def.cost && (s === "mangel" || s === "krit" || id === "sonst");
+        return `<div class="citem">
+          <span class="ct">${esc(t)}</span>${d ? `<span class="cd">${esc(d)}</span>` : ""}
+          <div class="cstate">
+            ${id === "sonst" ? "" : [["ok", "OK"], ["mangel", "Mangel"], ["krit", "Kritisch"]].map(([v, l]) => `<button type="button" class="${v}" data-act="check" data-id="${id}" data-v="${v}" aria-pressed="${s === v}">${l}</button>`).join("")}
+            ${costVisible ? `<div class="inp"><input id="cost-${id}" data-cost="${id}" type="text" inputmode="decimal" autocomplete="off" value="${fmtIn(o.costs[id], 0)}" placeholder="Kosten" aria-label="Geschätzte Kosten ${esc(t)}"><span class="u">€</span></div>` : ""}
+          </div>
+        </div>`;
+      }).join("")}</div>
+      ${def.cost ? `<div class="sumtable-wrap"><table class="sumtable"><tbody><tr class="total"><td>Sanierungsstau</td><td class="n" data-live="sanstau">${fEur(c.sanStau)}</td></tr></tbody></table><label class="switch" style="margin-top:8px"><input type="checkbox" id="f-sanEin2" data-k="sanEin" ${o.sanEin !== false ? "checked" : ""}><span>In die Gesamtinvestition einrechnen</span></label></div>` : ""}
+      ${g === "etw" ? `<div class="fgrid">${field(o, "ruecklage", { full: true, hint: o.ruecklage > 0 && o.flaeche > 0 ? `= ${fNum(o.ruecklage / o.flaeche, 0)} €/m². Mit den angekündigten Maßnahmen in den Protokollen abgleichen.` : "" })}</div>` : ""}
+    </div>`;
+  };
+  return `<section class="view">
+    ${sampleBanner(o)}
+    <div class="card">
+      <h3>Status und Notizen</h3>
+      ${seg("status", STATUS, o.status)}
+      <div class="fld"><div class="lbl"><label for="f-notes">Notizen</label></div><textarea id="f-notes" data-k="notes" data-text="1" placeholder="Eindrücke, Fragen an Makler oder Verwaltung, Verhandlungsstand …">${esc(o.notes || "")}</textarea></div>
+    </div>
+    ${groups.map(group).join("")}
+    ${isSample(o) ? "" : `<div class="card">
+      <h3>Akte</h3>
+      <div class="row"><button class="btn" data-act="dup">Kopie anlegen</button><button class="btn danger" data-act="del">Objekt löschen</button></div>
+      <p class="muted tiny">Eine Kopie eignet sich, um Varianten zu vergleichen, etwa mehr Eigenkapital oder einen niedrigeren Preis.</p>
+    </div>`}
+  </section>`;
+}
+
+function viewVergleich() {
+  const pool = S.objects.concat([SAMPLE]);
+  V.cmp = V.cmp.filter(id => pool.some(o => o.id === id));
+  if (!V.cmp.length) V.cmp = pool.slice(0, Math.min(3, pool.length)).map(o => o.id);
+  const sel = V.cmp.map(getObj).filter(Boolean);
+  const ev = sel.map(o => ({ o, ...evaluate(o) }));
+  const rows = [
+    ["Urteil", e => verdictChip(e.b), null],
+    ["Status", e => esc(STATUS[e.o.status] || ""), null],
+    ["Kaufpreis", e => fEur(e.o.preis), e => e.o.preis, "min"],
+    ["Preis je m²", e => e.o.flaeche ? fEur(e.o.preis / e.o.flaeche) : "–", e => e.o.flaeche ? e.o.preis / e.o.flaeche : null, "min"],
+    ["Gesamtinvestition", e => fEur(e.c.gesamt), null],
+    ["Kaltmiete/Monat", e => fEur(e.o.miete), null],
+    ["Miete je m²", e => e.o.flaeche ? fNum(e.o.miete / e.o.flaeche, 2) + " €" : "–", e => e.o.flaeche ? e.o.miete / e.o.flaeche : null, "max"],
+    ["Kaufpreisfaktor", e => fNum(e.c.faktor, 1), e => e.c.faktor, "min"],
+    ["Bruttomietrendite", e => fPct(e.c.brutto), e => e.c.brutto, "max"],
+    ["Nettomietrendite", e => fPct(e.c.netto), e => e.c.netto, "max"],
+    ["Cashflow n. St./Monat", e => fEurS(e.c.cfnMon), e => e.c.cfnMon, "max"],
+    ["Eigenkapitalrendite", e => e.c.irrImmo == null ? "–" : fPct(e.c.irrImmo * 100), e => e.c.irrImmo, "max"],
+    ["Vermögen nach 20 J.", e => fEur(e.c.jahre[20].vermoegen), e => e.c.jahre[20].vermoegen, "max"],
+    ["Eigenkapital", e => fEur(e.c.ekEff), null],
+    ["Sanierungsstau", e => fEur(e.c.sanStau), e => e.c.sanStau, "min"]
+  ];
+  return `<section class="view">
+    <h2>Vergleich</h2>
+    <div class="stack"><span class="muted small">Bis zu 4 Objekte auswählen:</span>
+      <div class="row">${pool.map(o => `<button class="chip ${V.cmp.includes(o.id) ? "b" : ""}" data-act="cmp" data-id="${o.id}" aria-pressed="${V.cmp.includes(o.id)}">${esc(o.ak || "")} ${esc(o.name || "Ohne Namen")}</button>`).join("")}</div>
+    </div>
+    ${ev.length ? `<div class="tscroll"><table class="data"><thead><tr><th>Kennzahl</th>${ev.map(e => `<th>${esc(e.o.name || "Ohne Namen")}</th>`).join("")}</tr></thead><tbody>
+      ${rows.map(([label, f, val, dir]) => {
+        let best = null;
+        if (val && ev.length > 1) {
+          const vs = ev.map(e => e.b.verdict ? val(e) : null).filter(v => v != null && isFinite(v));
+          if (vs.length > 1) best = dir === "min" ? Math.min(...vs) : Math.max(...vs);
+        }
+        return `<tr><td>${label}</td>${ev.map(e => { const v = val && e.b.verdict ? val(e) : null; return `<td class="${best != null && v === best ? "best" : ""}">${f(e)}</td>`; }).join("")}</tr>`;
+      }).join("")}
+    </tbody></table></div><p class="muted tiny">Grün markiert: bester Wert der Zeile.</p>` : `<p class="muted">Noch nichts ausgewählt.</p>`}
+  </section>`;
+}
+
+function viewAnnahmen() {
+  const s = { id: "settings" };
+  return `<section class="view">
+    <h2>Annahmen</h2>
+    <p class="muted small">Gelten für alle Objekte. Die unteren Standardwerte übernimmt jedes neue Objekt.</p>
+    <div class="card">
+      <h3>Du und dein Geld</h3>
+      <div class="fgrid">
+        ${field(s, "s.steuer", { hint: "inkl. Kirchensteuer, etwa 30 % bei 30.000 € Einkommen" })}
+        ${field(s, "s.puffer", { hint: "So viel kannst du monatlich zuschießen" })}
+        ${field(s, "s.zielCf", { hint: "0 € = Immobilie trägt sich selbst" })}
+        ${field(s, "s.halte", { hint: "Ab 10 Jahren steuerfreier Verkauf" })}
+      </div>
+    </div>
+    <div class="card">
+      <h3>Markt und Vergleich</h3>
+      <div class="fgrid">
+        ${field(s, "s.etf", { hint: "Weltweiter Aktien-ETF, langfristig" })}
+        ${field(s, "s.etfSteuer", { hint: "26,375 % auf 70 % des Gewinns" })}
+        ${field(s, "s.kostenst", { hint: "Hausgeld, Verwaltung, Instandhaltung" })}
+        ${field(s, "s.vk", { hint: "beim späteren Verkauf" })}
+      </div>
+    </div>
+    <div class="card">
+      <h3>Standardwerte für neue Objekte</h3>
+      <div class="fgrid">
+        <div class="fld full"><div class="lbl"><label for="f-s-land">Bundesland</label></div><select id="f-s-land" data-k="s.land">${Object.entries(R.LAENDER).map(([k, l]) => `<option value="${k}" ${S.settings.land === k ? "selected" : ""}>${l}</option>`).join("")}</select></div>
+        ${field(s, "s.zins", { hint: "Oktober 2026: rund 4 %" })}
+        ${field(s, "s.tilg")}
+        ${field(s, "s.bindung")}
+        ${field(s, "s.verwaltung")}
+        ${field(s, "s.notar")}
+        ${field(s, "s.grundbuch")}
+        ${field(s, "s.makler")}
+        ${field(s, "s.ausfall")}
+        ${field(s, "s.mietst")}
+        ${field(s, "s.wertst")}
+      </div>
+      <div class="row"><button class="btn" data-act="resetset">Auf Standard zurücksetzen</button></div>
+    </div>
+    <div class="card">
+      <h3>Sicherung</h3>
+      <div class="note ${syncOn ? "g" : "y"}">${sym(syncOn ? "g" : "y")}<span>${syncOn ? "<b>Synchron:</b> Deine Objekte liegen privat in deinem Konto und erscheinen auf jedem Gerät, auf dem du angemeldet bist." : "<b>Nur dieses Gerät:</b> Die Daten liegen in diesem Browser. Sichere sie regelmäßig als Datei."}</span></div>
+      <div class="row">
+        ${downloads ? `<button class="btn" data-act="export">Sicherung speichern</button>` : ""}
+        <label class="btn" for="import-file">Sicherung laden</label>
+        <input type="file" id="import-file" accept="application/json,.json" hidden>
+      </div>
+    </div>
+  </section>`;
+}
+
+function viewWissen() {
+  return `<section class="view">
+    <h2>Wissen</h2>
+    <div class="card">
+      <h3>So entscheidet die Objektakte</h3>
+      <div class="tscroll"><table class="rules"><thead><tr><th>Prüfpunkt</th><th>${sym("g")} Grün</th><th>${sym("y")} Gelb</th><th>${sym("r")} Rot</th></tr></thead><tbody>
+        <tr><td><b>Preis</b><br><span class="muted tiny">Kaufpreisfaktor</span></td><td>bis 20</td><td>20 bis 25</td><td>über 25</td></tr>
+        <tr><td><b>Liquidität</b><br><span class="muted tiny">Cashflow nach Steuern</span></td><td>ab 0 €</td><td>Zuzahlung bis Puffer</td><td>Zuzahlung über Puffer</td></tr>
+        <tr><td><b>Rendite</b><br><span class="muted tiny">Eigenkapitalrendite</span></td><td>mindestens ETF</td><td>bis 2 Punkte darunter</td><td>mehr als 2 Punkte darunter</td></tr>
+        <tr><td><b>Risiko</b><br><span class="muted tiny">Daten und Check</span></td><td>keine Warnung</td><td>Warnung</td><td>kritischer Punkt</td></tr>
+      </tbody></table></div>
+      <p class="small"><b>Kaufen:</b> kein Rot, höchstens ein Gelb. <b>Finger weg:</b> zwei oder mehr Rot. <b>Verhandeln:</b> alles dazwischen.</p>
+      <p class="muted tiny">Faustregeln aus der Praxis, keine Steuer- oder Anlageberatung. Vor dem Kauf mit Bank und Steuerberater gegenprüfen.</p>
+    </div>
+    <div class="card">
+      <h3>Fahrplan zum Kauf</h3>
+      <ol class="steps">
+        <li><b>Finanzierungsrahmen klären.</b> Bankgespräch mit Gehaltsnachweisen und Eigenkapital. Als Soldat auf Zeit das Dienstzeitende offen ansprechen.</li>
+        <li><b>Objekte erfassen.</b> Jedes Exposé hier eintragen. Das Urteil zeigt in zwei Minuten, ob sich eine Besichtigung lohnt.</li>
+        <li><b>Besichtigen mit Check.</b> Lage zu verschiedenen Tageszeiten ansehen, Bausubstanz mit Taschenlampe und Feuchtemessgerät prüfen.</li>
+        <li><b>Unterlagen anfordern.</b> Bei Wohnungen: Teilungserklärung, Protokolle der letzten 3 Jahre, Wirtschaftsplan, Jahresabrechnung, Energieausweis, Grundbuchauszug.</li>
+        <li><b>Mit Höchstpreis verhandeln.</b> Mängel aus dem Check mit Kosten belegen. Das ist dein stärkstes Argument.</li>
+        <li><b>Finanzierungszusage einholen.</b> Mehrere Angebote vergleichen, Sondertilgung vereinbaren.</li>
+        <li><b>Notarvertrag prüfen.</b> Verbraucher bekommen den Entwurf in der Regel zwei Wochen vor dem Termin. Kaufpreisaufteilung Boden, Gebäude, Inventar realistisch eintragen.</li>
+        <li><b>Übergabe und Verwaltung.</b> Zählerstände protokollieren, Mietverwaltung beauftragen, Anlage V für die Steuer vorbereiten.</li>
+      </ol>
+    </div>
+    <div class="card">
+      <h3>Als Soldat beachten</h3>
+      <ul class="notes">
+        <li>${sym("b")}<span class="t"><b>Versetzungen:</b> Kauf möglichst unabhängig vom Dienstort planen. Eine Mietverwaltung macht dich ortsunabhängig.</span></li>
+        <li>${sym("b")}<span class="t"><b>Steuervorteil sofort nutzen:</b> Verluste aus Vermietung kannst du als Freibetrag eintragen lassen. Dann steigt dein Netto jeden Monat statt einmal im Jahr.</span></li>
+        <li>${sym("y")}<span class="t"><b>Bank und Dienstzeit:</b> Bei Soldaten auf Zeit prüfen Banken, was nach dem Dienstzeitende kommt. Zinsbindung und Tilgung darauf abstimmen.</span></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Begriffe</h3>
+      <div class="gloss">${Object.entries(G).map(([k, [t, d]]) => `<details id="g-${k}"><summary>${esc(t)}</summary><p>${esc(d)}</p></details>`).join("")}</div>
+    </div>
+    <div class="card">
+      <h3>Quellen und Stand</h3>
+      <ul class="notes small">
+        <li>${sym("b")}<span class="t">Grunderwerbsteuer der Länder, Stand Oktober 2026 (Bremen 5,5 % seit 1.7.2025).</span></li>
+        <li>${sym("b")}<span class="t">Instandhaltung nach § 28 II. BV, Werte ab 1.1.2026. Mietausfallwagnis nach § 29 II. BV.</span></li>
+        <li>${sym("b")}<span class="t">AfA nach § 7 Abs. 4 EStG, anschaffungsnaher Aufwand nach § 6 Abs. 1 Nr. 1a EStG, Spekulationsfrist nach § 23 EStG.</span></li>
+        <li>${sym("b")}<span class="t">Bauzinsen 10 Jahre: knapp über 4 % (September 2026).</span></li>
+      </ul>
+    </div>
+  </section>`;
+}
+
+/* ---------- Render ---------- */
+const TABS = [
+  ["objekte", "Objekte", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg>'],
+  ["vergleich", "Vergleich", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 20V10M12 20V4M18 20v-7"/></svg>'],
+  ["annahmen", "Annahmen", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>'],
+  ["wissen", "Wissen", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5"/><path d="M9 8h6"/></svg>']
+];
+function renderTabs() {
+  $("#tabs").innerHTML = TABS.map(([k, l, ic]) => `<button data-act="tab" data-v="${k}" ${V.tab === k && !V.obj ? 'aria-current="page"' : ""}>${ic}<span>${l}</span></button>`).join("");
+}
+let needRender = false;
+function render() {
+  needRender = false;
+  renderTop();
+  renderTabs();
+  const main = $("#main");
+  const active = document.activeElement && document.activeElement.id;
+  let html;
+  if (V.obj) {
+    const o = getObj(V.obj);
+    if (!o) { V.obj = null; return render(); }
+    html = ({ urteil: viewUrteil, daten: viewDaten, finanzierung: viewFinanzierung, prognose: viewPrognose, check: viewCheck }[V.sub] || viewUrteil)(o);
+  } else {
+    html = ({ objekte: viewList, vergleich: viewVergleich, annahmen: viewAnnahmen, wissen: viewWissen }[V.tab] || viewList)();
+  }
+  main.innerHTML = html;
+  if (active) { const el = document.getElementById(active); if (el && main.contains(el)) el.focus(); }
+  requestAnimationFrame(drawCharts);
+}
+function safeRender() {
+  const a = document.activeElement;
+  if (a && $("#main").contains(a) && a.matches("input[type=text], textarea")) { needRender = true; liveUpdate(); }
+  else render();
+}
+function liveUpdate() {
+  if (!V.obj) return;
+  const o = getObj(V.obj); if (!o) return;
+  const { c, b } = evaluate(o);
+  const set = (k, html) => document.querySelectorAll(`[data-live="${k}"]`).forEach(el => { el.innerHTML = html; });
+  set("topchip", verdictChip(b));
+  set("strip", liveStrip(o));
+  set("nk", nkTable(o, c));
+  set("afa", afaLine(c));
+  set("noi", noiTable(o, c));
+  set("mietebullet", mieteBullet(o));
+  set("preisbullet", preisBullet(o));
+  set("hint-miete", o.miete && o.flaeche ? `= ${fNum(o.miete / o.flaeche, 2)} €/m²` : "");
+  set("finsum", finSummary(o, c));
+  set("ekline", ekLine(c));
+  set("l1", fEur(c.L1));
+  set("stress", b.verdict ? stressTable(b.stress, b.puffer) : `<p class="muted">Erst Daten vervollständigen.</p>`);
+  set("tilg", tilgPlan(o, c));
+  set("sanstau", fEur(c.sanStau));
+}
+function go(patch) { Object.assign(V, patch); saveView(); render(); window.scrollTo({ top: 0 }); }
+
+let toastT;
+function toast(msg) {
+  let el = $(".toast");
+  if (!el) { el = document.createElement("div"); el.className = "toast"; el.setAttribute("role", "status"); document.body.appendChild(el); }
+  el.textContent = msg; el.hidden = false;
+  clearTimeout(toastT); toastT = setTimeout(() => { el.hidden = true; }, 2400);
+}
+function sheet(html) {
+  $("#layer").innerHTML = `<div class="scrim" data-act="close"><div class="sheet" role="dialog" aria-modal="true">${html}<div class="row"><button class="btn primary" data-act="close">Verstanden</button></div></div></div>`;
+}
+const closeSheet = () => { $("#layer").innerHTML = ""; };
+
+/* ---------- Aktionen ---------- */
+function nextAk() {
+  const nr = (S.settings.akNr || 0) + 1;
+  S.settings.akNr = nr; touchSettings();
+  return "OA-" + String(new Date().getFullYear()).slice(2) + "-" + String(nr).padStart(3, "0");
+}
+function addObject(o) {
+  o.id = uid(); o.ak = nextAk(); o.created = Date.now(); o.updatedAt = Date.now();
+  S.objects.push(o);
+  touch(o);
+  return o;
+}
+const armed = new Map();
+function armOrRun(btn, key, label, fn) {
+  if (armed.get(key)) { armed.delete(key); fn(); return; }
+  armed.set(key, true);
+  btn.classList.add("armed"); btn.textContent = "Wirklich? Nochmal tippen";
+  setTimeout(() => { armed.delete(key); if (btn.isConnected) { btn.classList.remove("armed"); btn.textContent = label; } }, 3500);
+}
+async function save(filename, data, okMsg) {
+  if (!downloads) return;
+  try { const r = await downloads.save({ filename, data }); if (r && r.status === "saved") toast(okMsg); }
+  catch (e) { toast("Nicht gespeichert"); }
+}
+
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-act]");
+  if (!b) return;
+  const act = b.dataset.act;
+  if (act === "close") { if (e.target === b || b.tagName === "BUTTON") closeSheet(); return; }
+  const o = V.obj ? getObj(V.obj) : null;
+  switch (act) {
+    case "tab": go({ tab: b.dataset.v, obj: null }); break;
+    case "open": go({ obj: b.dataset.id, sub: "urteil" }); break;
+    case "back": go({ obj: null }); break;
+    case "sub": go({ sub: b.dataset.v }); break;
+    case "new": { const n = addObject(newObject()); n.name = ""; go({ obj: n.id, sub: "daten" }); setTimeout(() => { const el = $("#f-name"); if (el) el.focus(); }, 50); break; }
+    case "adopt": {
+      const copy = normObj(JSON.parse(JSON.stringify(SAMPLE)));
+      copy.name = "Kopie: " + SAMPLE.name; copy.status = "idee";
+      addObject(copy); SAMPLE = makeSample();
+      go({ obj: copy.id }); toast("Als eigenes Objekt gespeichert");
+      break;
+    }
+    case "dup": {
+      if (!o) return;
+      const copy = normObj(JSON.parse(JSON.stringify(o)));
+      copy.name = "Variante: " + (o.name || "Objekt");
+      addObject(copy); go({ obj: copy.id, sub: "urteil" }); toast("Kopie angelegt");
+      break;
+    }
+    case "del": {
+      if (!o || isSample(o)) return;
+      armOrRun(b, "del" + o.id, "Objekt löschen", () => {
+        S.objects = S.objects.filter(x => x.id !== o.id);
+        deletedIds.add(o.id); syncedIds.delete(o.id);
+        writeLocal(); scheduleWrite("o_" + o.id, 10);
+        go({ obj: null }); toast("Objekt gelöscht");
+      });
+      break;
+    }
+    case "set": {
+      if (!o) return;
+      o[b.dataset.k] = b.dataset.v;
+      if (b.dataset.k === "art") {
+        if (b.dataset.v === "etw" && !(o.bodenProz > 0)) o.bodenProz = 20;
+        if (b.dataset.v !== "etw" && o.bodenProz === 20) o.bodenProz = b.dataset.v === "haus" ? 30 : 25;
+      }
+      touch(o); render();
+      break;
+    }
+    case "check": {
+      if (!o) return;
+      const id = b.dataset.id, v = b.dataset.v;
+      o.checks[id] = o.checks[id] === v ? "" : v;
+      if (!o.checks[id]) delete o.checks[id];
+      touch(o); render();
+      break;
+    }
+    case "horizon": V.horizon = +b.dataset.v; saveView(); render(); break;
+    case "cmp": {
+      const id = b.dataset.id;
+      if (V.cmp.includes(id)) V.cmp = V.cmp.filter(x => x !== id);
+      else { if (V.cmp.length >= 4) { toast("Höchstens 4 Objekte"); return; } V.cmp.push(id); }
+      saveView(); render();
+      break;
+    }
+    case "gloss": { const g = G[b.dataset.k]; if (g) sheet(`<span class="eyebrow">Erklärung</span><h2>${esc(g[0])}</h2><p>${esc(g[1])}</p>`); break; }
+    case "resetset": {
+      armOrRun(b, "resetset", "Auf Standard zurücksetzen", () => {
+        const nr = S.settings.akNr; S.settings = Object.assign({}, DEF_SET, { akNr: nr });
+        touchSettings(); render(); toast("Annahmen zurückgesetzt");
+      });
+      break;
+    }
+    case "export": save("objektakte-sicherung-" + new Date().toISOString().slice(0, 10) + ".json", JSON.stringify({ app: "objektakte", v: 1, objects: S.objects, settings: S.settings }, null, 2), "Sicherung gespeichert"); break;
+    case "csv": {
+      if (!o) return;
+      const c = R.calc(o, S.settings);
+      const last = c.payoff || 50;
+      const lines = ["Jahr;Rate;Zinsen;Tilgung;Sondertilgung;Restschuld"];
+      for (let y = 1; y <= Math.min(50, last); y++) { const j = c.jahre[y]; lines.push([y, j.rate, j.zinsen, j.tilg, j.sonder, j.rest].map((v, i) => i ? v.toFixed(2).replace(".", ",") : v).join(";")); }
+      save("tilgungsplan-" + (o.ak || "objekt") + ".csv", lines.join("\n"), "Tilgungsplan gespeichert");
+      break;
+    }
+  }
+});
+
+function setField(key, raw, isText) {
+  const sc = key.startsWith("s.");
+  const k = sc ? key.slice(2) : key;
+  let v;
+  if (isText) v = raw;
+  else {
+    v = parseNum(raw);
+    if (Number.isNaN(v)) return false;
+  }
+  if (sc) {
+    if (v === null && !isText) v = DEF_SET[k];
+    S.settings[k] = v; touchSettings();
+    return true;
+  }
+  const o = getObj(V.obj); if (!o) return false;
+  o[k] = v;
+  touch(o);
+  return true;
+}
+document.addEventListener("input", e => {
+  const t = e.target;
+  if (t.dataset.cost) {
+    const o = getObj(V.obj); if (!o) return;
+    const v = parseNum(t.value);
+    if (Number.isNaN(v)) return;
+    if (v === null) delete o.costs[t.dataset.cost]; else o.costs[t.dataset.cost] = v;
+    touch(o); liveUpdate();
+    return;
+  }
+  const key = t.dataset.k;
+  if (!key || t.type === "checkbox" || t.tagName === "SELECT") return;
+  const isText = (F[key] && F[key].text) || t.dataset.text === "1";
+  if (setField(key, t.value, isText)) {
+    if (key === "name" && V.obj) { const tb = $(".obj-title b"); if (tb) tb.textContent = t.value || "Ohne Namen"; }
+    liveUpdate();
+  }
+});
+document.addEventListener("change", e => {
+  const t = e.target;
+  if (t.id === "import-file") return importFile(t);
+  const key = t.dataset.k;
+  if (t.dataset.cost) { if (needRender) render(); return; }
+  if (!key) return;
+  if (t.type === "checkbox") {
+    const o = getObj(V.obj); if (!o) return;
+    o[key] = t.checked; touch(o); render();
+    return;
+  }
+  if (t.tagName === "SELECT") {
+    if (key.startsWith("s.")) { S.settings[key.slice(2)] = t.value; touchSettings(); }
+    else { const o = getObj(V.obj); if (!o) return; o[key] = t.value; touch(o); }
+    render();
+    return;
+  }
+  const f = F[key];
+  if (f && !f.text && t.dataset.text !== "1") {
+    const v = parseNum(t.value);
+    if (Number.isNaN(v)) { toast("Bitte eine Zahl eintragen, z. B. 3,5"); t.value = fmtIn(getVal(getObj(V.obj) || {}, key), f.d, f.grp); return; }
+    t.value = fmtIn(key.startsWith("s.") ? S.settings[key.slice(2)] : v, f.d, f.grp);
+  }
+  if (needRender || key.startsWith("s.") || ["art"].includes(key)) render();
+});
+document.addEventListener("focusout", () => { if (needRender) setTimeout(() => { const a = document.activeElement; if (!(a && a.matches && a.matches("input[type=text], textarea"))) render(); }, 0); });
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeSheet(); });
+
+function importFile(input) {
+  const f = input.files && input.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const d = JSON.parse(r.result);
+      if (!d || !Array.isArray(d.objects)) throw new Error("x");
+      d.objects.forEach(x => {
+        const o = normObj(x);
+        const i = S.objects.findIndex(y => y.id === o.id);
+        if (i >= 0) S.objects[i] = o; else S.objects.push(o);
+        deletedIds.delete(o.id);
+        touch(o);
+      });
+      if (d.settings) { S.settings = Object.assign({}, DEF_SET, d.settings); touchSettings(); }
+      render(); toast(d.objects.length + " Objekte geladen");
+    } catch (err) { toast("Datei ist keine gültige Objektakte-Sicherung"); }
+  };
+  r.readAsText(f);
+}
+
+/* ---------- Start ---------- */
+let rsT;
+let lastW = 0;
+if (window.ResizeObserver) new ResizeObserver(() => { const w = $("#main").clientWidth; if (w === lastW) return; lastW = w; clearTimeout(rsT); rsT = setTimeout(drawCharts, 120); }).observe($("#main"));
+setInterval(() => { const d = $("#dtg"); if (d) d.textContent = "DTG " + dtg(new Date()); }, 15000);
+render();
+connect();
+})();
+</script>
